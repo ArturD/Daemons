@@ -15,9 +15,9 @@ namespace Agents.Util
         public void Add(TValue value)
         {
             _innerQueue.Add(value);
-            if (_eventFlag == 0)
+            if (_eventFlag == 1)
             {
-                _eventFlag = 1;
+                _eventFlag = 0;
                 _event.Set();
             }
         } 
@@ -37,7 +37,7 @@ namespace Agents.Util
                 _eventFlag = 1;
                 _event.Reset();
                 // timeout is last line of defence if object is inconsistent
-                _event.WaitOne(100);
+                _event.WaitOne(10000);
             }
         }
     }
