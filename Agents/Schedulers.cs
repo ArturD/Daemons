@@ -7,17 +7,17 @@ namespace Agents
 {
     public static class Schedulers
     {
-        public static DefaultScheduler Default(int threads = 2)
+        public static IScheduler Default(int threads = 2)
         {
-            return new DefaultScheduler(threads);
+            return new ThreadPoolScheduler();
         }
 
-        public static DefaultSchedulerDispatcher BuildDispatcher(this DefaultScheduler scheduler)
+        public static DefaultSchedulerDispatcher BuildDispatcher(this IScheduler scheduler)
         {
             return new DefaultSchedulerDispatcher(scheduler);
         }
 
-        public static Process BuildProcess(this DefaultScheduler scheduler, Action<Process> initAction)
+        public static Process BuildProcess(this IScheduler scheduler, Action<Process> initAction)
         {
             var process = new Process(scheduler.BuildDispatcher());
             process.Scheduler.Schedule(() => initAction(process));
