@@ -47,6 +47,16 @@ namespace Agents
 
         }
 
+        public void ScheduleOne(Action action, TimeSpan delay)
+        {
+            _scheduler.ScheduleOne(() => Schedule(action), delay);
+        }
+
+        public void ScheduleInterval(Action action, TimeSpan delay)
+        {
+            _scheduler.ScheduleInterval(() => Schedule(action), delay);
+        }
+
         private void DoOne()
         {
             if (Interlocked.Exchange(ref _executing, 1) == 0)

@@ -10,7 +10,7 @@ namespace Agents.Util
     {
         private readonly NoWaitQueue<TValue> _innerQueue = new NoWaitQueue<TValue>();
         private ManualResetEvent _event = new ManualResetEvent(false);
-        private int _eventFlag = 0;
+        private volatile int _eventFlag = 0;
 
         public void Add(TValue value)
         {
@@ -37,7 +37,7 @@ namespace Agents.Util
                 _eventFlag = 1;
                 _event.Reset();
                 // timeout is last line of defence if object is inconsistent
-                _event.WaitOne(10000);
+                _event.WaitOne(1000);
             }
         }
     }

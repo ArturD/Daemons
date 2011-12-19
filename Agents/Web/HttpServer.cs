@@ -45,19 +45,21 @@ namespace Agents.Web
             connection.ReadAsync(buffer.Segment.Array, buffer.Segment.Offset, buffer.Segment.Count, 
                 readBytes =>
                     {
-                        //if(readBytes == 0) process.Shutdown(); //TODO check this !!!
-                        ArraySegment<byte> readSegment = new ArraySegment<byte>(buffer.Segment.Array, 0, buffer.Segment.Offset + readBytes);
+                        var readSegment = new ArraySegment<byte>(buffer.Segment.Array, 0, buffer.Segment.Offset + readBytes);
                         var headers = TryParse(readSegment);
                         if (headers != null)
                         {
                             StartHttp(headers, connection);
                         }
-                        else 
+                        else
                         {
                             ReadOne(new Buffer()
-                                         {
-                                             Segment = new ArraySegment<byte>(buffer.Segment.Array, buffer.Segment.Offset + readBytes, buffer.Segment.Count - readBytes),
-                                         }, process, connection);
+                                        {
+                                            Segment =
+                                                new ArraySegment<byte>(buffer.Segment.Array,
+                                                                       buffer.Segment.Offset + readBytes,
+                                                                       buffer.Segment.Count - readBytes),
+                                        }, process, connection);
                         }
                     });
         }

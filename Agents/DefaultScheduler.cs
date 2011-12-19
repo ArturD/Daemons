@@ -45,6 +45,21 @@ namespace Agents
             //return scheduledAction;
         }
 
+        public void ScheduleOne(Action action, TimeSpan delay)
+        {
+            var timer = new Timer((cb)=> action(), null, delay, new TimeSpan(-1));
+        }
+
+        public void ScheduleInterval(Action action, TimeSpan delay)
+        {
+            ScheduleInterval(action, delay, delay);
+        }
+
+        public void ScheduleInterval(Action action, TimeSpan dueTime, TimeSpan delay)
+        {
+            var timer = new Timer((cb) => action(), null, delay, new TimeSpan(-1));
+        }
+
         public void Stop()
         {
             _stopping = true;
