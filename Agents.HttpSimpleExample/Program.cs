@@ -23,12 +23,13 @@ namespace Agents.HttpSimpleExample
                             var server = scheduler.BuildHttpServer(serverProcess);
                             server.Listen(new IPEndPoint(IPAddress.Any, 1234),
                                           (process, http) =>
-                                          {
-                                              http.Write("Hello !", () =>
                                               {
-                                                  process.Shutdown();
+                                                  process.Scheduler.ScheduleOne(
+                                                      () =>
+                                                          {
+                                                              http.Write("Hello !", process.Shutdown);
+                                                          }, TimeSpan.FromSeconds(1));
                                               });
-                                          });
                         });
                     Console.ReadLine();
                 }

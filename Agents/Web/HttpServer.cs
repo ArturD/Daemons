@@ -37,19 +37,21 @@ namespace Agents.Web
                     {
                         Segment = new ArraySegment<byte>(new byte[2048])
                     };
-            ReadOne(buffer, process, connection);
+            ReadOne(buffer, connection);
         }
 
-        private void ReadOne(Buffer buffer, IProcess process, TcpConnection connection)
+        private void ReadOne(Buffer buffer, TcpConnection connection)
         {
             connection.ReadAsync(buffer.Segment.Array, buffer.Segment.Offset, buffer.Segment.Count, 
                 readBytes =>
                     {
                         var readSegment = new ArraySegment<byte>(buffer.Segment.Array, 0, buffer.Segment.Offset + readBytes);
-                        var headers = TryParse(readSegment);
+                        int headersSize;
+                        var headers = TryParse(readSegment, out headersSize);
                         if (headers != null)
                         {
-                            StartHttp(headers, connection);
+                            FixBuffer(buffer.Segment.Array, headersSize, buffer.Segment.Offset + readBytes);
+                            StartHttp(headers, buffer.Segment.Array, connection);
                         }
                         else
                         {
@@ -59,15 +61,39 @@ namespace Agents.Web
                                                 new ArraySegment<byte>(buffer.Segment.Array,
                                                                        buffer.Segment.Offset + readBytes,
                                                                        buffer.Segment.Count - readBytes),
-                                        }, process, connection);
+                                        }, connection);
                         }
                     });
         }
 
-        private string[] TryParse(ArraySegment<byte> segment)
+        private void FixBuffer(byte[] buffer, int headerBytes, int readBytes)
         {
+            for (int i = headerBytes; i < readBytes; i++)
+            {
+                buffer[i - headerBytes] = buffer[i];
+            }
+        }
+
+        private string[] TryParse(ArraySegment<byte> segment, out int headersSize)
+        {
+            headersSize = 0;
             var headersString = Encoding.ASCII.GetString(segment.Array, segment.Offset, segment.Count);
-            var headers = headersString.Split(new[] {"\r\n", "\n"}, StringSplitOptions.None);
+            int endh;
+            if ((endh = headersString.IndexOf("\r\n\r\n")) > 0)
+            {
+                headersSize = endh + 4;
+            }
+            else if ((endh = headersString.IndexOf("\n\n")) > 0)
+            {
+                headersSize = endh + 2;
+            }
+            else
+            {
+                return null;
+            }
+
+            headersString = headersString.Substring(0, headersSize);
+            var headers = headersString.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
 
             if (headers.Skip(headers.Length - 2).Count(x => x == "") == 2)
             {
@@ -76,7 +102,7 @@ namespace Agents.Web
             return null;
         }
 
-        private void StartHttp(string[] headers, TcpConnection connection)
+        private void StartHttp(string[] headers, byte[] buffer, TcpConnection connection)
         {
             var process = _processFactory.BuildProcess();
             process.Scheduler.Schedule(
@@ -86,12 +112,18 @@ namespace Agents.Web
                         var startTime = DateTime.UtcNow;
                         process.OnShutdown(() =>
                                                {
-                                                   connection.Process.Shutdown();
+                                                   //connection.Process.Shutdown();
+                                                   KeepAlive(buffer, connection);
                                                    Logger.Debug("Ending http request processing {0}", (DateTime.UtcNow - startTime).TotalMilliseconds);
                                                });
                         // todo add killer
                         _httpProcessInitializer(process, new HttpConnection(connection));
                     });
+        }
+
+        private void KeepAlive(byte[] buffer, TcpConnection connection)
+        {
+            ReadOne(new Buffer() { Segment = new ArraySegment<byte>(buffer, 0, buffer.Length) }, connection);
         }
 
         private class Buffer

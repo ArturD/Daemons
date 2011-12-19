@@ -30,7 +30,7 @@ namespace Agents.Web
             var headers = FormatHeaders(new Dictionary<string, string>
                              {
                                  {"ContentType",  "text/plain"},
-                                 {"Connection", "close"},
+                                 {"Connection", "keep-alive"},
                                  {"Content-Length", "" + byteContent.Length}
                              });
             var byteHeaders = contentEncoder.GetBytes(headers);
