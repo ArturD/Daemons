@@ -5,11 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Agents.Util;
+using NLog;
 
 namespace Agents
 {
     public class DefaultSchedulerDispatcher : IDisposable, IScheduler
     {
+        private readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly NoWaitQueue<ProcessAction> _queue = new NoWaitQueue<ProcessAction>();
         private readonly IScheduler _scheduler;
         private int _elementCounter = 0;
@@ -26,14 +28,16 @@ namespace Agents
             var processAction = new ProcessAction(action);
             if (_disposed) return;
 
-            if (Interlocked.Exchange(ref _executing, 1) == 0)
+            if (_executing == 0 && Interlocked.Exchange(ref _executing, 1) == 0)
             {
+                Logger.Trace("Executing action by stilling thread.");
                 // still thread
                 action();
                 _executing = 0;
             }
             else
             {
+                Logger.Trace("Queueing action.");
                 _queue.Add(processAction);
 
                 // If there is no action on global scheduler, we need to add one.

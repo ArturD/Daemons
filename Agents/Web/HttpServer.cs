@@ -45,7 +45,7 @@ namespace Agents.Web
             connection.ReadAsync(buffer.Segment.Array, buffer.Segment.Offset, buffer.Segment.Count, 
                 readBytes =>
                     {
-                        if(readBytes == 0) process.Shutdown(); //TODO check this !!!
+                        //if(readBytes == 0) process.Shutdown(); //TODO check this !!!
                         ArraySegment<byte> readSegment = new ArraySegment<byte>(buffer.Segment.Array, 0, buffer.Segment.Offset + readBytes);
                         var headers = TryParse(readSegment);
                         if (headers != null)
@@ -80,7 +80,13 @@ namespace Agents.Web
             process.Scheduler.Schedule(
                 ()=>
                     {
-                        process.OnShutdown(() => connection.Process.Shutdown());
+                        Logger.Debug("Staring http request processing :"+ headers[0]);
+                        var startTime = DateTime.UtcNow;
+                        process.OnShutdown(() =>
+                                               {
+                                                   connection.Process.Shutdown();
+                                                   Logger.Debug("Ending http request processing {0}", (DateTime.UtcNow - startTime).TotalMilliseconds);
+                                               });
                         // todo add killer
                         _httpProcessInitializer(process, new HttpConnection(connection));
                     });

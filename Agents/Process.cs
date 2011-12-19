@@ -27,8 +27,9 @@ namespace Agents
 
         public Process(IScheduler scheduler)
         {
+            DateTime start = DateTime.UtcNow;
             if(Logger.IsTraceEnabled) Logger.Trace("Starting Process {0}", GetHashCode());
-            _shutdownActions.Add(() => Logger.Trace("Shutdown Process {0}", GetHashCode()));
+            _shutdownActions.Add(() => Logger.Trace("Shutdown Process {0} life-time {1}", GetHashCode(), (DateTime.UtcNow - start).TotalMilliseconds));
             _scheduler = scheduler;
             _messageEndpoint = new ProcessMessageEndpoint(
                 message => _scheduler.Schedule(

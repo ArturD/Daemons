@@ -68,7 +68,8 @@ namespace Agents.Net
                     exception);
                 throw;
             }
-            endAction(read);
+            if(read == 0) _process.Shutdown();
+            else endAction(read);
         }
 
         public void WriteAsync(byte[] buffer, int offset, int count, Action endAction)
@@ -110,6 +111,7 @@ namespace Agents.Net
         public void Close()
         {
             Logger.Trace("Closing TCP process.");
+            _stream.Dispose();
             _client.Close();
         }
     }

@@ -25,12 +25,15 @@ namespace Agents.Web
             if (response == null) throw new ArgumentNullException("response");
             if (contentEncoder == null) throw new ArgumentNullException("contentEncoder");
             
+            var byteContent = contentEncoder.GetBytes(response);
+
             var headers = FormatHeaders(new Dictionary<string, string>
                              {
-                                 {"ContentType",  "plain/text"}
+                                 {"ContentType",  "text/plain"},
+                                 {"Connection", "close"},
+                                 {"Content-Length", "" + byteContent.Length}
                              });
             var byteHeaders = contentEncoder.GetBytes(headers);
-            var byteContent = contentEncoder.GetBytes(response);
             var buffer = new byte[byteHeaders.Length + byteContent.Length];
             byteHeaders.CopyTo(buffer, 0);
             byteContent.CopyTo(buffer, byteHeaders.Length);
@@ -62,7 +65,7 @@ namespace Agents.Web
         private static string FormatHeaders(IEnumerable<KeyValuePair<string, string>> headers)
         {
             var str =
-                "HTTP/1.0 200 OK" + HttpServer.HttpNewLine +
+                "HTTP/1.1 200 OK" + HttpServer.HttpNewLine +
                 headers
                     .Select(kv => kv.Key + ": " + kv.Value + HttpServer.HttpNewLine)
                     .Aggregate("", (a, b) => a + b) + HttpServer.HttpNewLine;
