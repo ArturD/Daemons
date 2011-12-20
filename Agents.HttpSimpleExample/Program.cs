@@ -13,30 +13,19 @@ namespace Agents.HttpSimpleExample
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         static void Main(string[] args)
         {
-            try
+            using (var scheduler = Schedulers.Default())
             {
-                using (var scheduler = Schedulers.Default())
-                {
-                    scheduler.BuildProcess(
-                        serverProcess =>
+                scheduler.BuildProcess(
+                    serverProcess =>
                         {
                             var server = scheduler.BuildHttpServer(serverProcess);
                             server.Listen(new IPEndPoint(IPAddress.Any, 1234),
                                           (process, http) =>
                                               {
-                                                  process.Scheduler.ScheduleOne(
-                                                      () =>
-                                                          {
-                                                              http.Write("Hello !", process.Shutdown);
-                                                          }, TimeSpan.FromSeconds(1));
+                                                  http.Write("Hello !", process.Shutdown);
                                               });
                         });
-                    Console.ReadLine();
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.ErrorException("Unexpected end of application.", ex);
+                Console.ReadLine();
             }
         }
     }
