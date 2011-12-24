@@ -6,3 +6,6 @@
 *.vspscc
 *.vssscc
 _ReSharper*
+*.pidb
+*.log
+*.userprefs
