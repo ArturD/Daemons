@@ -9,11 +9,11 @@ namespace Agents.Net
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly IProcess _process;
-        private readonly IPocessFactory _processFactory;
+        private readonly IProcessFactory _processFactory;
         private TcpListener _listener = null;
         private Action<IProcess, TcpConnection> _processInitializator;
 
-        public TcpServer(IProcess process, IPocessFactory processFactory)
+        public TcpServer(IProcess process, IProcessFactory processFactory)
         {
             _process = process;
             _processFactory = processFactory;

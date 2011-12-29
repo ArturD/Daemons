@@ -7,7 +7,7 @@ namespace Agents
 {
     public static class Schedulers
     {
-        public static DefaultScheduler Default(int threads = 2)
+        public static DefaultScheduler BuildScheduler(int threads = 2)
         {
             return new DefaultScheduler(threads);
         }
@@ -16,11 +16,14 @@ namespace Agents
         {
             return new DefaultSchedulerDispatcher(scheduler);
         }
+    }
 
-        public static Process BuildProcess(this DefaultScheduler scheduler, Action<Process> initAction)
+    public static class ProcessFactoryExtensions
+    {
+        public static IProcess BuildProcess(this IProcessFactory processFactory, Action<IProcess> buildAction)
         {
-            var process = new Process(scheduler.BuildDispatcher());
-            process.Scheduler.Schedule(() => initAction(process));
+            var process = processFactory.BuildProcess();
+            process.Scheduler.Schedule(() => buildAction(process));
             return process;
         }
     }

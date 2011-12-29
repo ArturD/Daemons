@@ -27,6 +27,11 @@ namespace Agents
             }
         }
 
+        public DefaultScheduler()
+            : this(Environment.ProcessorCount)
+        {
+        }
+
         private void Loop()
         {
             while (true)

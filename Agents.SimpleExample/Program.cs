@@ -26,15 +26,16 @@ namespace Agents.SimpleExample
         {
             int n = 10000;
             int processNo = 1000;
-            using (var scheduler = Schedulers.Default())
+            using (var scheduler = Schedulers.BuildScheduler())
             {
+                var processFactor = new ProcessFactory(scheduler);
                 int countDown = processNo;
-                var processes = Range(processNo).Select(asd => scheduler.BuildProcess(
+                var processes = Range(processNo).Select(asd => processFactor.BuildProcess(
                     process =>
                         {
                             int threadsInCount = 0;
                             var ints = new List<int>();
-                            process.OnMessage<int>(message =>
+                            process.OnMessage<int>((message, context) =>
                                                        {
                                                            if (Interlocked.Increment(ref threadsInCount) > 1)
                                                                Debug.Fail("More than one thread in single process");
@@ -54,14 +55,14 @@ namespace Agents.SimpleExample
                                                                Interlocked.Decrement(ref countDown);
                                                            }
                                                            else
-                                                               process.MessageEndpoint.SendMessage(new MessageContext() { Message = message+1 });
+                                                               process.MessageEndpoint.QueueMessage(message + 1, null);
                                                            Interlocked.Decrement(ref threadsInCount);
                                                        });
                         })).ToArray();
 
                     foreach (var process in processes)
                     {
-                        process.MessageEndpoint.SendMessage(new MessageContext() {Message = 0});
+                        process.MessageEndpoint.QueueMessage(0, null);
                     }
                 while (countDown != 0)
                 {

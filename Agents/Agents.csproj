@@ -46,12 +46,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IMessageEndpoint.cs" />
+    <Compile Include="IMessageHandler.cs" />
     <Compile Include="IProcess.cs" />
-    <Compile Include="IPocessFactory.cs" />
+    <Compile Include="IProcessFactory.cs" />
+    <Compile Include="MessageBus\IMessageBus.cs" />
+    <Compile Include="IMessageContext.cs" />
+    <Compile Include="IResponseContext.cs" />
+    <Compile Include="MessageBus\IMessageBusFactory.cs" />
+    <Compile Include="MessageBus\UnicastMessageBusFactory.cs" />
+    <Compile Include="Util\AnonymousDisposer.cs" />
+    <Compile Include="ZeroResponseContext.cs" />
+    <Compile Include="MessageBus\UnicastMessageBus.cs" />
+    <Compile Include="MessageContext.cs" />
     <Compile Include="Net\TcpConnection.cs" />
     <Compile Include="Net\TcpServer.cs" />
     <Compile Include="Net\TcpServers.cs" />
-    <Compile Include="PocessFactory.cs" />
+    <Compile Include="ProcessFactory.cs" />
     <Compile Include="Process.cs" />
     <Compile Include="DefaultScheduler.cs" />
     <Compile Include="DefaultSchedulerDispatcher.cs" />

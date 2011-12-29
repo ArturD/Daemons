@@ -1,6 +1,6 @@
 namespace Agents
 {
-    public interface IPocessFactory
+    public interface IProcessFactory
     {
         IProcess BuildProcess();
     }

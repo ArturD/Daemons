@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agents.EchoServerExample", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agents.HttpSimpleExample", "Agents.HttpSimpleExample\Agents.HttpSimpleExample.csproj", "{E37B2318-1AC2-4C9A-9D4C-4C30B781E430}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agents.MessageBusExample", "Agents.MessageBusExample\Agents.MessageBusExample.csproj", "{BF074374-0348-4C1F-9AF9-5F01DD3C9EEB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +73,16 @@ Global
 		{E37B2318-1AC2-4C9A-9D4C-4C30B781E430}.Release|Mixed Platforms.Build.0 = Release|x86
 		{E37B2318-1AC2-4C9A-9D4C-4C30B781E430}.Release|x86.ActiveCfg = Release|x86
 		{E37B2318-1AC2-4C9A-9D4C-4C30B781E430}.Release|x86.Build.0 = Release|x86
+		{BF074374-0348-4C1F-9AF9-5F01DD3C9EEB}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{BF074374-0348-4C1F-9AF9-5F01DD3C9EEB}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{BF074374-0348-4C1F-9AF9-5F01DD3C9EEB}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{BF074374-0348-4C1F-9AF9-5F01DD3C9EEB}.Debug|x86.ActiveCfg = Debug|x86
+		{BF074374-0348-4C1F-9AF9-5F01DD3C9EEB}.Debug|x86.Build.0 = Debug|x86
+		{BF074374-0348-4C1F-9AF9-5F01DD3C9EEB}.Release|Any CPU.ActiveCfg = Release|x86
+		{BF074374-0348-4C1F-9AF9-5F01DD3C9EEB}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{BF074374-0348-4C1F-9AF9-5F01DD3C9EEB}.Release|Mixed Platforms.Build.0 = Release|x86
+		{BF074374-0348-4C1F-9AF9-5F01DD3C9EEB}.Release|x86.ActiveCfg = Release|x86
+		{BF074374-0348-4C1F-9AF9-5F01DD3C9EEB}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

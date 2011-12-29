@@ -12,13 +12,13 @@ namespace Agents.Web
     public class HttpServer
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        private readonly IPocessFactory _processFactory;
+        private readonly IProcessFactory _processFactory;
         internal const string HttpNewLine = "\r\n";
         private static readonly Regex Endline = new Regex(HttpNewLine);
         private readonly TcpServer _tcpServer;
         private Action<IProcess, HttpConnection> _httpProcessInitializer;
 
-        public HttpServer(IProcess process, IPocessFactory processFactory)
+        public HttpServer(IProcess process, IProcessFactory processFactory)
         {
             _processFactory = processFactory;
             _tcpServer = new TcpServer(process, processFactory);
