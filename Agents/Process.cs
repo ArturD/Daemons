@@ -14,7 +14,7 @@ namespace Agents
         private readonly IScheduler _scheduler;
         private readonly IMessageBus _messageBus;
         private readonly IMessageEndpoint _messageEndpoint;
-        private readonly List<IMessageHandlerWithPriority> _handlers = new List<IMessageHandlerWithPriority>();
+        private readonly SortedSet<IMessageHandlerWithPriority> _handlers = new SortedSet<IMessageHandlerWithPriority>();
         private readonly List<Action> _shutdownActions = new List<Action>();
 
         public IMessageBus MessageBus
@@ -63,7 +63,7 @@ namespace Agents
         private IDisposable AddMessageHandler<TMessage>(MessageHandler<TMessage> handler)
         {
             _handlers.Add(handler);
-            _handlers.Sort((x, y) => x.Priority - y.Priority);
+            //_handlers.Sort((x, y) => x.Priority - y.Priority);
             return new AnonymousDisposer(() => _handlers.Remove(handler));
         }
 
@@ -87,7 +87,7 @@ namespace Agents
                     });
         }
 
-        internal interface IMessageHandlerWithPriority : IMessageHandler
+        internal interface IMessageHandlerWithPriority : IMessageHandler, IComparable<IMessageHandlerWithPriority>
         {
             int Priority { get; }
         }
@@ -120,6 +120,14 @@ namespace Agents
                     return  _handleFunction((TMessage) message, context);
                 }
                 return false;
+            }
+
+            public int CompareTo(IMessageHandlerWithPriority other)
+            {
+                var diff = Math.Sign(Priority - other.Priority);
+                if (diff != 0)
+                    return diff;
+                return GetHashCode() - other.GetHashCode(); // FIXME
             }
         }
 

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Agents.Controllers;
 
 namespace Agents.ControllerExample
@@ -23,10 +20,10 @@ namespace Agents.ControllerExample
                 {
                     int messageNo = i;
                     var line = "line " + i;
-                    MessageBus.Publish("/printer", new PrintRequest() { Content = line, MessageNo = messageNo })
+                    MessageBus.Publish("/printer", new PrintRequest {Content = line, MessageNo = messageNo})
                         .ExpectMessage<PrintAck>((m, c) =>
                                                      {
-                                                         if (messageNo % 100 == 0) Console.WriteLine("printed: {0}", line);
+                                                             Console.WriteLine("printed: {0}", line);
                                                      });
                 }
             }
