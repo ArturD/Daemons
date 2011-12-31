@@ -14,7 +14,7 @@ namespace Agents.EchoServerExample
         {
             using (var scheduler = Schedulers.BuildScheduler())
             {
-                var processFactory = new ProcessFactory(scheduler);
+                var processFactory = new ProcessManager(scheduler);
                 processFactory.BuildProcess(
                     serverProcess =>
                         {

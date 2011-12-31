@@ -57,8 +57,13 @@ namespace Agents
         public IDisposable OnMessage<TMessage>(Action<TMessage, IMessageContext> action, int priority)
         {
             var handler = new MessageHandler<TMessage>(action, priority);
+            return AddMessageHandler(handler);
+        }
+
+        private IDisposable AddMessageHandler<TMessage>(MessageHandler<TMessage> handler)
+        {
             _handlers.Add(handler);
-            _handlers.Sort((x, y) => x.Priority - y.Priority );
+            _handlers.Sort((x, y) => x.Priority - y.Priority);
             return new AnonymousDisposer(() => _handlers.Remove(handler));
         }
 
@@ -86,24 +91,33 @@ namespace Agents
         {
             int Priority { get; }
         }
+
         internal class MessageHandler<TMessage> : IMessageHandlerWithPriority
         {
-            private readonly Action<TMessage, IMessageContext> _action;
+            private readonly Func<TMessage, IMessageContext, bool> _handleFunction;
 
             public int Priority { get; protected set; }
 
-            public MessageHandler(Action<TMessage, IMessageContext> action, int priority)
+            public MessageHandler(Func<TMessage, IMessageContext, bool> handleFunction, int priority)
             {
-                _action = action;
+                _handleFunction = handleFunction;
                 Priority = priority;
+            }
+
+            public MessageHandler(Action<TMessage, IMessageContext> handleAction, int priority)
+                : this((m, c) =>
+                {
+                    handleAction(m, c);
+                    return true;
+                }, priority)
+            {
             }
 
             public bool TryHandle(object message, IMessageContext context)
             {
                 if (message is TMessage)
                 {
-                    _action((TMessage) message, context);
-                    return true;
+                    return  _handleFunction((TMessage) message, context);
                 }
                 return false;
             }
@@ -144,49 +158,40 @@ namespace Agents
         {
             private readonly Process _hostProcess;
             private State _state = State.Waiting;
-            //private readonly string _id;
-            //private readonly string _responseToId;
-
+          
             public IProcess HostProcess
             {
                 get { return _hostProcess; }
             }
 
-            //public string Id
-            //{
-            //    get { return _id; }
-            //}
-
-            //public string ResponseToId
-            //{
-            //    get { return _responseToId; }
-            //}
-
             public ResponseMessageContext(Process hostProcess)
             {
                 _hostProcess = hostProcess;
-                //_id = id;
-                //_responseToId = responseToId;
             }
 
             public void Response(object message)
             {
-                _hostProcess.MessageEndpoint.QueueMessage(message, new ZeroResponseContext());
+                _hostProcess.MessageEndpoint.QueueMessage(message, new ZeroResponseContext(this));
             }
 
             public IResponseContext ExpectMessage(Action<object, IMessageContext> consume)
             {
                 IDisposable disposer = null;
-                disposer = _hostProcess.OnMessage<object>(
+                disposer = _hostProcess.AddMessageHandler( new MessageHandler<object>(
                     (o, c) =>
                         {
+                            var context = c as ZeroResponseContext;
+                            if (context == null || context.OriginalMessageContext != this)
+                                return false;
+
                             consume(o, c);
                             _state = State.Executed;
                             // disposer should be propper at this point if ExpectMessage is called from correct process
                             Debug.Assert(disposer != null, "disposer != null");
-                            IDisposable disposer1 = disposer;
-                            _hostProcess.Scheduler.Schedule(disposer1.Dispose);
-                        }, -10);
+                            //_hostProcess.Scheduler.Schedule(disposer.Dispose);
+                            disposer.Dispose();
+                            return true;
+                        }, -10));
                 return this;
             }
 
@@ -216,6 +221,26 @@ namespace Agents
                 Executed,
                 TimedOut,
                 Error,
+            }
+
+            class ZeroResponseContext : IMessageContext
+            {
+                private readonly ResponseMessageContext _originalMessageContext;
+
+                public ResponseMessageContext OriginalMessageContext
+                {
+                    get { return _originalMessageContext; }
+                }
+
+                public ZeroResponseContext(ResponseMessageContext originalMessageContext)
+                {
+                    _originalMessageContext = originalMessageContext;
+                }
+
+                public void Response(object message)
+                {
+                    throw new NotSupportedException("Response not supported for this message.");
+                }
             }
         }
     }

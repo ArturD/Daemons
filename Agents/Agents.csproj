@@ -46,15 +46,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\ControllerFactory.cs" />
+    <Compile Include="Controllers\IController.cs" />
+    <Compile Include="Controllers\IControllerFactory.cs" />
+    <Compile Include="Controllers\ProcessControllerBase.cs" />
     <Compile Include="IMessageEndpoint.cs" />
     <Compile Include="IMessageHandler.cs" />
     <Compile Include="IProcess.cs" />
-    <Compile Include="IProcessFactory.cs" />
+    <Compile Include="IProcessManager.cs" />
     <Compile Include="MessageBus\IMessageBus.cs" />
     <Compile Include="IMessageContext.cs" />
     <Compile Include="IResponseContext.cs" />
     <Compile Include="MessageBus\IMessageBusFactory.cs" />
     <Compile Include="MessageBus\UnicastMessageBusFactory.cs" />
+    <Compile Include="ProcessFactoryExtensions.cs" />
     <Compile Include="Util\AnonymousDisposer.cs" />
     <Compile Include="ZeroResponseContext.cs" />
     <Compile Include="MessageBus\UnicastMessageBus.cs" />
@@ -62,7 +67,7 @@
     <Compile Include="Net\TcpConnection.cs" />
     <Compile Include="Net\TcpServer.cs" />
     <Compile Include="Net\TcpServers.cs" />
-    <Compile Include="ProcessFactory.cs" />
+    <Compile Include="ProcessManager.cs" />
     <Compile Include="Process.cs" />
     <Compile Include="DefaultScheduler.cs" />
     <Compile Include="DefaultSchedulerDispatcher.cs" />

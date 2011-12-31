@@ -9,14 +9,14 @@ namespace Agents.Net
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly IProcess _process;
-        private readonly IProcessFactory _processFactory;
+        private readonly IProcessManager _processManager;
         private TcpListener _listener = null;
         private Action<IProcess, TcpConnection> _processInitializator;
 
-        public TcpServer(IProcess process, IProcessFactory processFactory)
+        public TcpServer(IProcess process, IProcessManager processManager)
         {
             _process = process;
-            _processFactory = processFactory;
+            _processManager = processManager;
         }
 
         public void Listen(IPEndPoint endpoint, Action<IProcess, TcpConnection> processInitializator)
@@ -46,7 +46,7 @@ namespace Agents.Net
 
         private void BuildNewListenerProcess(TcpClient client)
         {
-            var process = _processFactory.BuildProcess();
+            var process = _processManager.BuildProcess();
             process.Scheduler.Schedule(
                 () =>
                     {

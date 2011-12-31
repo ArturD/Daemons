@@ -6,7 +6,7 @@ namespace Agents.MessageBusExample
     {
         static void Main(string[] args)
         {
-            var processFactory = new ProcessFactory();
+            var processFactory = new ProcessManager();
             processFactory.BuildProcess(
                 process =>
                     {

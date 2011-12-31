@@ -7,9 +7,9 @@ namespace Agents.Web
 {
     public static class HttpServers
     {
-        public static HttpServer BuildHttpServer(this IProcessFactory processFactory, IProcess process)
+        public static HttpServer BuildHttpServer(this IProcessManager processManager, IProcess process)
         {
-            var server = new HttpServer(process, processFactory);
+            var server = new HttpServer(process, processManager);
             return server;
         }
     }

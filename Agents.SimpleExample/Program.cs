@@ -28,7 +28,7 @@ namespace Agents.SimpleExample
             int processNo = 1000;
             using (var scheduler = Schedulers.BuildScheduler())
             {
-                var processFactor = new ProcessFactory(scheduler);
+                var processFactor = new ProcessManager(scheduler);
                 int countDown = processNo;
                 var processes = Range(processNo).Select(asd => processFactor.BuildProcess(
                     process =>
