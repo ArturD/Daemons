@@ -46,14 +46,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Barrier.cs" />
     <Compile Include="Controllers\ControllerFactory.cs" />
     <Compile Include="Controllers\IController.cs" />
     <Compile Include="Controllers\IControllerFactory.cs" />
     <Compile Include="Controllers\ProcessControllerBase.cs" />
+    <Compile Include="IFuture.cs" />
     <Compile Include="IMessageEndpoint.cs" />
     <Compile Include="IMessageHandler.cs" />
     <Compile Include="IProcess.cs" />
     <Compile Include="IProcessManager.cs" />
+    <Compile Include="ISynchedFuture.cs" />
     <Compile Include="MessageBus\IMessageBus.cs" />
     <Compile Include="IMessageContext.cs" />
     <Compile Include="IResponseContext.cs" />

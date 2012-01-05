@@ -182,7 +182,7 @@ namespace Agents
                 _hostProcess.MessageEndpoint.QueueMessage(message, new ZeroResponseContext(this));
             }
 
-            public IResponseContext ExpectMessage(Action<object, IMessageContext> consume)
+            public IResponseContext ExpectResponse(Action<object, IMessageContext> consume)
             {
                 IDisposable disposer = null;
                 disposer = _hostProcess.AddMessageHandler( new MessageHandler<object>(
@@ -203,9 +203,9 @@ namespace Agents
                 return this;
             }
 
-            public IResponseContext ExpectMessage<T>(Action<T, IMessageContext> consume)
+            public IResponseContext ExpectResponse<T>(Action<T, IMessageContext> consume)
             {
-                return ExpectMessage((o, e) => consume((T) o, e));
+                return ExpectResponse((o, e) => consume((T) o, e));
             }
 
             public IResponseContext ExpectTimeout(TimeSpan timeout, Action timeoutAction)
@@ -213,8 +213,11 @@ namespace Agents
                 _hostProcess.Scheduler.ScheduleOne(
                     () =>
                         {
-                            if(_state == State.Waiting)
+                            if (_state == State.Waiting)
+                            {
+                                _state = State.TimedOut;
                                 timeoutAction();
+                            }
                         }, timeout);
                 return this;
             }
