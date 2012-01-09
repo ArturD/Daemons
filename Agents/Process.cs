@@ -37,26 +37,26 @@ namespace Agents
             DateTime start = DateTime.UtcNow;
             if(Logger.IsTraceEnabled) Logger.Trace("Starting Process {0}", GetHashCode());
             _shutdownActions.Add(() => Logger.Trace("Shutdown Process {0} life-time {1}", GetHashCode(), (DateTime.UtcNow - start).TotalMilliseconds));
-            _scheduler = scheduler;
+            _scheduler = new ProcessDispatcherWrapper(scheduler, this);
             _messageBus = messageBusFactory.Create(this);
             _messageEndpoint = new ProcessMessageEndpoint(this);
         }
 
-        public IDisposable OnMessage<TMessage>(Action<TMessage, IMessageContext> action)
+        public IDisposable OnMessage<TMessage>(string path, Action<TMessage, IMessageContext> action)
         {
-            return OnMessage(action, 0);
+            return OnMessage(path, action, 0);
         }
 
-        public IResponseContext SendTo(IProcess targetProcess, object message)
+        public IResponseContext SendTo(IProcess targetProcess, object message, string path)
         {
-            var responseContext = new ResponseMessageContext(this);
+            var responseContext = new ResponseMessageContext(this, path);
             targetProcess.MessageEndpoint.QueueMessage(message, responseContext);
             return responseContext;
         }
 
-        public IDisposable OnMessage<TMessage>(Action<TMessage, IMessageContext> action, int priority)
+        public IDisposable OnMessage<TMessage>(string path, Action<TMessage, IMessageContext> action, int priority)
         {
-            var handler = new MessageHandler<TMessage>(action, priority);
+            var handler = new MessageHandler<TMessage>(action, path, priority) ;
             return AddMessageHandler(handler);
         }
 
@@ -97,19 +97,21 @@ namespace Agents
             private readonly Func<TMessage, IMessageContext, bool> _handleFunction;
 
             public int Priority { get; protected set; }
+            public string Path { get; set; }
 
-            public MessageHandler(Func<TMessage, IMessageContext, bool> handleFunction, int priority)
+            public MessageHandler(Func<TMessage, IMessageContext, bool> handleFunction,string path, int priority)
             {
                 _handleFunction = handleFunction;
                 Priority = priority;
+                Path = path;
             }
 
-            public MessageHandler(Action<TMessage, IMessageContext> handleAction, int priority)
+            public MessageHandler(Action<TMessage, IMessageContext> handleAction, string path, int priority)
                 : this((m, c) =>
                 {
                     handleAction(m, c);
                     return true;
-                }, priority)
+                }, path, priority)
             {
             }
 
@@ -172,14 +174,17 @@ namespace Agents
                 get { return _hostProcess; }
             }
 
-            public ResponseMessageContext(Process hostProcess)
+            public ResponseMessageContext(Process hostProcess, string path)
             {
                 _hostProcess = hostProcess;
+                Path = path;
             }
+
+            public string Path { get; private set; }
 
             public void Response(object message)
             {
-                _hostProcess.MessageEndpoint.QueueMessage(message, new ZeroResponseContext(this));
+                _hostProcess.MessageEndpoint.QueueMessage(message, new ZeroResponseContext(this) { Path = "/response" });
             }
 
             public IResponseContext ExpectResponse(Action<object, IMessageContext> consume)
@@ -199,7 +204,7 @@ namespace Agents
                             //_hostProcess.Scheduler.Schedule(disposer.Dispose);
                             disposer.Dispose();
                             return true;
-                        }, -10));
+                        }, "/response", -10));
                 return this;
             }
 
@@ -247,6 +252,8 @@ namespace Agents
                 {
                     _originalMessageContext = originalMessageContext;
                 }
+
+                public string Path { get; set; }
 
                 public void Response(object message)
                 {

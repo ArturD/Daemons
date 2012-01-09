@@ -51,6 +51,7 @@
     <Compile Include="Controllers\IController.cs" />
     <Compile Include="Controllers\IControllerFactory.cs" />
     <Compile Include="Controllers\ProcessControllerBase.cs" />
+    <Compile Include="Daemons.cs" />
     <Compile Include="IFuture.cs" />
     <Compile Include="IMessageEndpoint.cs" />
     <Compile Include="IMessageHandler.cs" />
@@ -62,7 +63,9 @@
     <Compile Include="IResponseContext.cs" />
     <Compile Include="MessageBus\IMessageBusFactory.cs" />
     <Compile Include="MessageBus\UnicastMessageBusFactory.cs" />
-    <Compile Include="ProcessFactoryExtensions.cs" />
+    <Compile Include="NotInDaemonContextException.cs" />
+    <Compile Include="ProcessDispatcherWrapper.cs" />
+    <Compile Include="ProcessManagerExtensions.cs" />
     <Compile Include="Util\AnonymousDisposer.cs" />
     <Compile Include="ZeroResponseContext.cs" />
     <Compile Include="MessageBus\UnicastMessageBus.cs" />

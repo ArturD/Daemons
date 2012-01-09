@@ -15,7 +15,7 @@ namespace Agents
         private readonly NoWaitQueue<ProcessAction> _queue = new NoWaitQueue<ProcessAction>();
         private readonly IScheduler _scheduler;
         private int _elementCounter = 0;
-        private int _executing = 0;
+        private volatile int _executing = 0;
         private bool _disposed = false;
 
         public DefaultSchedulerDispatcher(IScheduler scheduler)
@@ -28,7 +28,7 @@ namespace Agents
             var processAction = new ProcessAction(action);
             if (_disposed) return;
 
-            if (_executing == 0 && Interlocked.Exchange(ref _executing, 1) == 0)
+            if (_executing == 0 && Daemons.CurrentOrNull == null && Interlocked.Exchange(ref _executing, 1) == 0)
             {
                 Logger.Trace("Executing action by stilling thread.");
                 // still thread

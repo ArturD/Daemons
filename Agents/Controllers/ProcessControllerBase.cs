@@ -30,14 +30,14 @@ namespace Agents.Controllers
             get { return _process.MessageBus; }
         }
 
-        public IDisposable OnMessage<TMessage>(Action<TMessage, IMessageContext> action)
+        public IDisposable OnMessage<TMessage>(string path, Action<TMessage, IMessageContext> action)
         {
-            return _process.OnMessage(action);
+            return _process.OnMessage(path, action);
         }
 
-        public IResponseContext SendTo(IProcess targetProcess, object message)
+        public IResponseContext SendTo(IProcess targetProcess, object message, string path)
         {
-            return _process.SendTo(targetProcess, message);
+            return _process.SendTo(targetProcess, message, path);
         }
 
         public void OnShutdown(Action shutdownAction)

@@ -24,25 +24,21 @@ namespace Agents.SimpleExample
 
         private static void RunTests()
         {
-            int n = 10000;
-            int processNo = 1000;
-            using (var scheduler = Schedulers.BuildScheduler())
+            const int n = 1000;
+            const int processNo = 1000;
+            using (var processManager = new ProcessManager())
             {
-                var processFactor = new ProcessManager(scheduler);
-                int countDown = processNo;
-                var processes = Range(processNo).Select(asd => processFactor.BuildProcess(
+                DateTime start = DateTime.UtcNow;
+                DateTime end = DateTime.MinValue;
+                int  countDown = processNo;
+                var processes = Range(processNo).Select(asd => processManager.BuildProcess(
                     process =>
                         {
-                            int threadsInCount = 0;
                             var ints = new List<int>();
-                            process.OnMessage<int>((message, context) =>
+                            process.OnMessage<int>("/ints",(message, context) =>
                                                        {
-                                                           if (Interlocked.Increment(ref threadsInCount) > 1)
-                                                               Debug.Fail("More than one thread in single process");
-                                                           Debug.Assert(ints.Count == message);
                                                            ints.Add(message);
                                                            
-                                                           Debug.Assert(ints.Count <= n);
                                                            if (message == n - 1)
                                                            {
                                                                for (int i = 0; i < ints.Count; i++)
@@ -52,22 +48,24 @@ namespace Agents.SimpleExample
                                                                }
 
                                                                Console.WriteLine("one down");
-                                                               Interlocked.Decrement(ref countDown);
+                                                               if (Interlocked.Decrement(ref countDown) == 0)
+                                                                   end = DateTime.UtcNow;
                                                            }
                                                            else
                                                                process.MessageEndpoint.QueueMessage(message + 1, null);
-                                                           Interlocked.Decrement(ref threadsInCount);
                                                        });
                         })).ToArray();
 
-                    foreach (var process in processes)
+                    foreach (var targetProcess in processes)
                     {
-                        process.MessageEndpoint.QueueMessage(0, null);
+                        targetProcess.MessageEndpoint.QueueMessage(0, new ZeroResponseContext());
                     }
                 while (countDown != 0)
                 {
                     Thread.Sleep(100);
                 }
+                Console.WriteLine("Time: {0}", (end - start));
+                Console.ReadLine();
             }
         }
     }

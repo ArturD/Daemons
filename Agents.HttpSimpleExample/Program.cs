@@ -13,13 +13,12 @@ namespace Agents.HttpSimpleExample
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         static void Main(string[] args)
         {
-            using (var scheduler = Schedulers.BuildScheduler())
+            using (var processManager = new ProcessManager())
             {
-                var processFactory = new ProcessManager(scheduler);
-                processFactory.BuildProcess(
+                processManager.BuildProcess(
                     serverProcess =>
                         {
-                            var server = processFactory.BuildHttpServer(serverProcess);
+                            var server = processManager.BuildHttpServer(serverProcess);
                             server.Listen(new IPEndPoint(IPAddress.Any, 1234),
                                           (process, http) =>
                                               {

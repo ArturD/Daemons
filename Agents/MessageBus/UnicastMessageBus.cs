@@ -19,15 +19,15 @@ namespace Agents.MessageBus
             IProcess process;
             if (_concurrentDictionary.TryGetValue(path, out process))
             {
-                return _hostProcess.SendTo(process, message);
+                return _hostProcess.SendTo(process, message, path);
             }
-            throw new NotImplementedException();
+            throw new NotImplementedException(); // TODO
         }
 
         public void Subscribe<TMessage>(string path, Action<TMessage, IMessageContext> consumer)
         {
             Subscribe(path, _hostProcess);
-            _hostProcess.OnMessage(consumer, -10);
+            _hostProcess.OnMessage(path, consumer, -10);
         }
 
         public void Subscribe(string path, IProcess process)

@@ -2,7 +2,7 @@ using System;
 
 namespace Agents
 {
-    public static class ProcessFactoryExtensions
+    public static class ProcessManagerExtensions
     {
         public static IProcess BuildProcess(this IProcessManager processManager, Action<IProcess> buildAction)
         {
