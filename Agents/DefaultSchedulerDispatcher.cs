@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -12,37 +13,41 @@ namespace Agents
     public class DefaultSchedulerDispatcher : IDisposable, IScheduler
     {
         private readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        private readonly NoWaitQueue<ProcessAction> _queue = new NoWaitQueue<ProcessAction>();
+        private readonly IProcess _process;
+        private readonly IProducerConsumerCollection<Action> _queue = new NoWaitQueue<Action>();
         private readonly IScheduler _scheduler;
         private int _elementCounter = 0;
         private volatile int _executing = 0;
         private bool _disposed = false;
 
-        public DefaultSchedulerDispatcher(IScheduler scheduler)
+        public DefaultSchedulerDispatcher(IScheduler scheduler, IProcess process)
         {
             _scheduler = scheduler;
+            _process = process;
         }
 
         public void Schedule(Action action)
         {
-            var processAction = new ProcessAction(action);
+            //var processAction = new ProcessAction(action);
             if (_disposed) return;
 
             if (_executing == 0 && Daemons.CurrentOrNull == null && Interlocked.Exchange(ref _executing, 1) == 0)
             {
                 Logger.Trace("Executing action by stilling thread.");
                 // still thread
-                action();
+                using (Daemons.Use(_process))
+                {
+                    action();
+                }
                 _executing = 0;
             }
             else
             {
                 Logger.Trace("Queueing action.");
-                _queue.Add(processAction);
+                _queue.TryAdd(action);
 
                 // If there is no action on global scheduler, we need to add one.
-                if (Interlocked.Increment(ref _elementCounter) == 1)
-                    _scheduler.Schedule(DoOne);
+                _scheduler.Schedule(DoOne);
             }
 
         }
@@ -61,11 +66,16 @@ namespace Agents
         {
             if (Interlocked.Exchange(ref _executing, 1) == 0)
             {
-                var takeResult = _queue.TakeNoWait();
-                if (_disposed) return;
-                Debug.Assert(takeResult.Success, "At this point there must have been previous element.");
-                takeResult.Value.Execute();
-                if (Interlocked.Decrement(ref _elementCounter) != 0) _scheduler.Schedule(DoOne);
+                Action action;
+                if (_queue.TryTake(out action))
+                {
+                    if (_disposed) return;
+
+                    using (Daemons.Use(_process))
+                    {
+                        action();
+                    }
+                }
                 _executing = 0;
             }
             else _scheduler.Schedule(DoOne);
@@ -75,21 +85,6 @@ namespace Agents
         public void Dispose()
         {
             _disposed = true;
-        }
-
-        internal class ProcessAction
-        {
-            private readonly Action _action;
-
-            public ProcessAction(Action action)
-            {
-                _action = action;
-            }
-
-            public void Execute()
-            {
-                _action();
-            }
         }
     }
 }

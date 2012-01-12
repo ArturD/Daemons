@@ -28,7 +28,7 @@ namespace Agents.Net
                 var read = _stream.Read(buffer, offset, count);
                 if(Logger.IsTraceEnabled) Logger.Trace("Read data synchronously {0}", read);
 
-                _process.Scheduler.Schedule(
+                _process.Dispatcher.Schedule(
                     () => endAction(read));
 
             }
@@ -36,7 +36,7 @@ namespace Agents.Net
             try
             {
                 _stream.BeginRead(buffer, offset, count,
-                                  asyncResult => _process.Scheduler.Schedule(
+                                  asyncResult => _process.Dispatcher.Schedule(
                                       () => HandleEndRead(endAction, asyncResult)), null);
             }
             catch (IOException exception)
@@ -80,7 +80,7 @@ namespace Agents.Net
             {
                 _stream.BeginWrite(buffer, offset, count,
                                    asyncResult =>
-                                   _process.Scheduler.Schedule(
+                                   _process.Dispatcher.Schedule(
                                        () =>
                                            {
                                                if (Logger.IsTraceEnabled)
@@ -95,6 +95,10 @@ namespace Agents.Net
             {
                 Logger.TraceException("Connection Reset by Peer", exception);
                 _process.Shutdown();
+            }
+            catch (ObjectDisposedException exception)
+            {
+                Logger.TraceException("Object disposed.", exception); // TODO think about this
             }
         }
 

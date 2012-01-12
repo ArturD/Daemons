@@ -19,17 +19,12 @@ namespace Agents
             _counter2 = counter;
         }
 
-        public SynchronizedBarrier On(IScheduler scheduler)
+        public void Join(Action continuation)
         {
-            return new SynchronizedBarrier(scheduler, this);
+            JoinSync(() => Daemons.Current.Dispatcher.Schedule(continuation));
         }
 
-        public SynchronizedBarrier On(IProcess process)
-        {
-            return new SynchronizedBarrier(process.Scheduler, this);
-        }
-
-        internal void Join(Action action)
+        internal void JoinSync(Action action)
         {
             if (Interlocked.Decrement(ref _counter) < 0) 
                 throw new InvalidOperationException("Joined more than expected (counter below 0).");
@@ -38,27 +33,10 @@ namespace Agents
             {
                 while (true)
                 {
-                    var take = _continuations.TakeNoWait();
-                    if (!take.Success) break;
-                    take.Value();
+                    Action continuation;
+                    if (!_continuations.TryTake(out continuation)) break;
+                    continuation();
                 }
-            }
-        }
-
-        public class SynchronizedBarrier
-        {
-            private readonly IScheduler _scheduler;
-            private readonly Barrier _barrier;
-
-            public SynchronizedBarrier(IScheduler scheduler, Barrier barrier)
-            {
-                _scheduler = scheduler;
-                _barrier = barrier;
-            }
-
-            public void Join(Action continuation)
-            {
-                _barrier.Join(() => _scheduler.Schedule(continuation));
             }
         }
     }

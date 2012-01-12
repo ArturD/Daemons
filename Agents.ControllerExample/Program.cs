@@ -18,21 +18,21 @@ namespace Agents.ControllerExample
         {
             public override void Initialize()
             {
-                Barrier.On(Process).Join(() =>
-                                             {
-                                                 int countDown = 100;
-                                                 for (int i = 0; i < 100; i++)
-                                                 {
-                                                     var line = "line " + (i + 1);
-                                                     Publish("/printer", line).
-                                                         ExpectResponse<object>(
-                                                             (m, c) =>
-                                                                 {
-                                                                     Console.WriteLine("printed: {0}", line);
-                                                                     if(--countDown == 0) _processManager.Dispose();
-                                                                 });
-                                                 }
-                                             });
+                Barrier.Join(() =>
+                                 {
+                                     int countDown = 100;
+                                     for (int i = 0; i < 100; i++)
+                                     {
+                                         var line = "line " + (i + 1);
+                                         Publish("/printer", line).
+                                             ExpectResponse<object>(
+                                                 (m, c) =>
+                                                     {
+                                                         Console.WriteLine("printed: {0}", line);
+                                                         if (--countDown == 0) _processManager.Dispose();
+                                                     });
+                                     }
+                                 });
             }
         }
         public class PrinterProcessController : ProcessControllerBase
@@ -45,7 +45,7 @@ namespace Agents.ControllerExample
                                                       context.Response(new object());
                                                   });
 
-                Barrier.On(Process).Join(()=> { });
+                Barrier.Join(()=> { });
             }
         }
     }

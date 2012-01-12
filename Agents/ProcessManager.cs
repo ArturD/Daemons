@@ -34,7 +34,7 @@ namespace Agents
 
         public IProcess BuildProcess()
         {
-            var process = new Process(new DefaultSchedulerDispatcher(_scheduler), _messageBusFactory);
+            var process = new Process(_scheduler, _messageBusFactory);
             return process;
         }
 

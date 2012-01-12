@@ -47,18 +47,17 @@ namespace Agents.SimpleExample
                                                                        Console.WriteLine("on position {0} was {1}", i, ints[i]);
                                                                }
 
-                                                               Console.WriteLine("one down");
                                                                if (Interlocked.Decrement(ref countDown) == 0)
                                                                    end = DateTime.UtcNow;
                                                            }
                                                            else
-                                                               process.MessageEndpoint.QueueMessage(message + 1, null);
+                                                               process.MessageEndpoint.QueueMessage(message + 1, new ZeroResponseContext() {Path = "/ints"});
                                                        });
                         })).ToArray();
 
                     foreach (var targetProcess in processes)
                     {
-                        targetProcess.MessageEndpoint.QueueMessage(0, new ZeroResponseContext());
+                        targetProcess.MessageEndpoint.QueueMessage(0, new ZeroResponseContext() { Path = "/ints"});
                     }
                 while (countDown != 0)
                 {

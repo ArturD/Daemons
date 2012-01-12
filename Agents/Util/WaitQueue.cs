@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,13 +9,13 @@ namespace Agents.Util
 {
     public class WaitQueue<TValue>
     {
-        private readonly NoWaitQueue<TValue> _innerQueue = new NoWaitQueue<TValue>();
+        private readonly IProducerConsumerCollection<TValue> _innerQueue = new ConcurrentQueue<TValue>();
         private ManualResetEvent _event = new ManualResetEvent(false);
         private volatile int _eventFlag = 0;
 
         public void Add(TValue value)
         {
-            _innerQueue.Add(value);
+            _innerQueue.TryAdd(value);
             if (_eventFlag == 1)
             {
                 _eventFlag = 0;
@@ -28,10 +29,10 @@ namespace Agents.Util
             {
                 for (int i = 0; i < 3; i++)
                 {
-                    var result = _innerQueue.TakeNoWait();
-                    if (result.Success)
+                    TValue result;
+                    if (_innerQueue.TryTake(out result))
                     {
-                        return result.Value;
+                        return result;
                     }
                 }
                 _eventFlag = 1;

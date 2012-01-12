@@ -16,7 +16,7 @@ namespace Agents.Web
         internal const string HttpNewLine = "\r\n";
         private static readonly Regex Endline = new Regex(HttpNewLine);
         private readonly TcpServer _tcpServer;
-        private Action<IProcess, HttpConnection> _httpProcessInitializer;
+        private Action<IProcess, HttpRequest, HttpResponse> _httpProcessInitializer;
 
         public HttpServer(IProcess process, IProcessManager processManager)
         {
@@ -24,7 +24,7 @@ namespace Agents.Web
             _tcpServer = new TcpServer(process, processManager);
         }
 
-        public void Listen(IPEndPoint endpoint, Action<IProcess, HttpConnection> httpProcessInitializer)
+        public void Listen(IPEndPoint endpoint, Action<IProcess, HttpRequest, HttpResponse> httpProcessInitializer)
         {
             _tcpServer.Listen(endpoint, TcpProcess);
             _httpProcessInitializer = httpProcessInitializer;
@@ -105,7 +105,7 @@ namespace Agents.Web
         private void StartHttp(string[] headers, byte[] buffer, TcpConnection connection)
         {
             var process = _processManager.BuildProcess();
-            process.Scheduler.Schedule(
+            process.Dispatcher.Schedule(
                 ()=>
                     {
                         Logger.Debug("Staring http request processing :"+ headers[0]);
@@ -117,7 +117,7 @@ namespace Agents.Web
                                                    Logger.Debug("Ending http request processing {0}", (DateTime.UtcNow - startTime).TotalMilliseconds);
                                                });
                         // todo add killer
-                        _httpProcessInitializer(process, new HttpConnection(connection));
+                        _httpProcessInitializer(process, HttpRequest.Create(headers), new HttpResponse(connection));
                     });
         }
 

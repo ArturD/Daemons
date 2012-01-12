@@ -7,7 +7,7 @@ namespace Agents
         public static IProcess BuildProcess(this IProcessManager processManager, Action<IProcess> buildAction)
         {
             var process = processManager.BuildProcess();
-            process.Scheduler.Schedule(() => buildAction(process));
+            process.Dispatcher.Schedule(() => buildAction(process));
             return process;
         }
     }

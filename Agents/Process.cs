@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reflection;
 using Agents.MessageBus;
 using Agents.Util;
 using NLog;
@@ -11,10 +9,10 @@ namespace Agents
     public class Process : IProcess
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        private readonly IScheduler _scheduler;
+        private readonly IScheduler _dispatcher;
         private readonly IMessageBus _messageBus;
         private readonly IMessageEndpoint _messageEndpoint;
-        private readonly SortedSet<IMessageHandlerWithPriority> _handlers = new SortedSet<IMessageHandlerWithPriority>();
+        private readonly CompositeHandler _compositeHandler = new CompositeHandler();
         private readonly List<Action> _shutdownActions = new List<Action>();
 
         public IMessageBus MessageBus
@@ -22,9 +20,9 @@ namespace Agents
             get { return _messageBus; }
         }
 
-        public IScheduler Scheduler
+        public IScheduler Dispatcher
         {
-            get { return _scheduler; }
+            get { return _dispatcher; }
         }
 
         public IMessageEndpoint MessageEndpoint
@@ -35,9 +33,12 @@ namespace Agents
         public Process(IScheduler scheduler, IMessageBusFactory messageBusFactory)
         {
             DateTime start = DateTime.UtcNow;
-            if(Logger.IsTraceEnabled) Logger.Trace("Starting Process {0}", GetHashCode());
-            _shutdownActions.Add(() => Logger.Trace("Shutdown Process {0} life-time {1}", GetHashCode(), (DateTime.UtcNow - start).TotalMilliseconds));
-            _scheduler = new ProcessDispatcherWrapper(scheduler, this);
+            if (Logger.IsTraceEnabled) Logger.Trace("Starting Process {0}", GetHashCode());
+            _shutdownActions.Add(
+                () =>
+                Logger.Trace("Shutdown Process {0} life-time {1}", GetHashCode(),
+                             (DateTime.UtcNow - start).TotalMilliseconds));
+            _dispatcher = new DefaultSchedulerDispatcher(scheduler, this);
             _messageBus = messageBusFactory.Create(this);
             _messageEndpoint = new ProcessMessageEndpoint(this);
         }
@@ -56,15 +57,13 @@ namespace Agents
 
         public IDisposable OnMessage<TMessage>(string path, Action<TMessage, IMessageContext> action, int priority)
         {
-            var handler = new MessageHandler<TMessage>(action, path, priority) ;
+            var handler = new MessageHandler<TMessage>(action, path, priority);
             return AddMessageHandler(handler);
         }
 
         private IDisposable AddMessageHandler<TMessage>(MessageHandler<TMessage> handler)
         {
-            _handlers.Add(handler);
-            //_handlers.Sort((x, y) => x.Priority - y.Priority);
-            return new AnonymousDisposer(() => _handlers.Remove(handler));
+            return _compositeHandler.AddHandler(handler);
         }
 
         public void OnShutdown(Action shutdownAction)
@@ -74,8 +73,8 @@ namespace Agents
 
         public void Shutdown()
         {
-            if(Logger.IsTraceEnabled) Logger.Trace("Scheduling shutdown at {0}", GetHashCode());
-            _scheduler.Schedule(
+            if (Logger.IsTraceEnabled) Logger.Trace("Scheduling shutdown at {0}", GetHashCode());
+            _dispatcher.Schedule(
                 () =>
                     {
                         if (Logger.IsTraceEnabled) Logger.Trace("Running shutdown actions at {0}", GetHashCode());
@@ -83,7 +82,7 @@ namespace Agents
                         {
                             shutdownAction();
                         }
-                        _scheduler.Dispose();
+                        _dispatcher.Dispose();
                     });
         }
 
@@ -99,7 +98,7 @@ namespace Agents
             public int Priority { get; protected set; }
             public string Path { get; set; }
 
-            public MessageHandler(Func<TMessage, IMessageContext, bool> handleFunction,string path, int priority)
+            public MessageHandler(Func<TMessage, IMessageContext, bool> handleFunction, string path, int priority)
             {
                 _handleFunction = handleFunction;
                 Priority = priority;
@@ -108,10 +107,10 @@ namespace Agents
 
             public MessageHandler(Action<TMessage, IMessageContext> handleAction, string path, int priority)
                 : this((m, c) =>
-                {
-                    handleAction(m, c);
-                    return true;
-                }, path, priority)
+                           {
+                               handleAction(m, c);
+                               return true;
+                           }, path, priority)
             {
             }
 
@@ -119,7 +118,7 @@ namespace Agents
             {
                 if (message is TMessage)
                 {
-                    return  _handleFunction((TMessage) message, context);
+                    return _handleFunction((TMessage) message, context);
                 }
                 return false;
             }
@@ -135,32 +134,38 @@ namespace Agents
 
         internal class ProcessMessageEndpoint : IMessageEndpoint
         {
-            private readonly Process _process;
+            internal readonly Process Process;
 
             public ProcessMessageEndpoint(Process process)
             {
-                _process = process;
+                Process = process;
             }
 
             public void QueueMessage(object message, IMessageContext context)
             {
-                _process._scheduler.Schedule(
-                    () =>
-                        {
-                            if (Logger.IsTraceEnabled) Logger.Trace("Started Process {0}", GetHashCode());
-                            foreach (var messageHandler in _process._handlers)
-                            {
-                                try
-                                {
-                                    if (messageHandler.TryHandle(message, context)) break;
-                                }
-                                catch (Exception ex)
-                                {
-                                    Logger.TraceException("Unexpected exception", ex);
-                                    throw new TargetInvocationException(ex);
-                                }
-                            }
-                        });
+                var messageAndContext = new MessageAndContext(this, message, context);
+                Process._dispatcher.Schedule(messageAndContext.Handle);
+            }
+        }
+
+        private class MessageAndContext
+        {
+            public ProcessMessageEndpoint Endpoint { get; set; }
+            public object Message { get; set; }
+            public IMessageContext Context { get; set; }
+
+            public MessageAndContext(ProcessMessageEndpoint endpoint, object message, IMessageContext context)
+            {
+                Endpoint = endpoint;
+                Message = message;
+                Context = context;
+            }
+
+            public void Handle()
+            {
+                if (Logger.IsTraceEnabled) Logger.Trace("Started Process {0}", GetHashCode());
+                Endpoint.Process._compositeHandler.TryHandle(Message, Context);
+
             }
         }
 
@@ -168,7 +173,8 @@ namespace Agents
         {
             private readonly Process _hostProcess;
             private State _state = State.Waiting;
-          
+            private Action<object, IMessageContext> _consume;
+
             public IProcess HostProcess
             {
                 get { return _hostProcess; }
@@ -184,28 +190,23 @@ namespace Agents
 
             public void Response(object message)
             {
-                _hostProcess.MessageEndpoint.QueueMessage(message, new ZeroResponseContext(this) { Path = "/response" });
+                _hostProcess.MessageEndpoint.QueueMessage(message, new ZeroResponseContext(this) {Path = "/response"});
             }
 
             public IResponseContext ExpectResponse(Action<object, IMessageContext> consume)
             {
-                IDisposable disposer = null;
-                disposer = _hostProcess.AddMessageHandler( new MessageHandler<object>(
-                    (o, c) =>
-                        {
-                            var context = c as ZeroResponseContext;
-                            if (context == null || context.OriginalMessageContext != this)
-                                return false;
-
-                            consume(o, c);
-                            _state = State.Executed;
-                            // disposer should be propper at this point if ExpectMessage is called from correct process
-                            Debug.Assert(disposer != null, "disposer != null");
-                            //_hostProcess.Scheduler.Schedule(disposer.Dispose);
-                            disposer.Dispose();
-                            return true;
-                        }, "/response", -10));
+                _consume = consume;
+                _hostProcess._compositeHandler.AddResponseHandler(this);
                 return this;
+            }
+
+            public void Consume(object message, IMessageContext context)
+            {
+                if(_state == State.Waiting)
+                {
+                    _consume(message, context);
+                    _state = State.Executed;
+                }
             }
 
             public IResponseContext ExpectResponse<T>(Action<T, IMessageContext> consume)
@@ -215,7 +216,7 @@ namespace Agents
 
             public IResponseContext ExpectTimeout(TimeSpan timeout, Action timeoutAction)
             {
-                _hostProcess.Scheduler.ScheduleOne(
+                _hostProcess.Dispatcher.ScheduleOne(
                     () =>
                         {
                             if (_state == State.Waiting)
@@ -231,6 +232,7 @@ namespace Agents
             {
                 throw new NotImplementedException();
             }
+
             private enum State
             {
                 Waiting,
@@ -238,27 +240,78 @@ namespace Agents
                 TimedOut,
                 Error,
             }
+        }
 
-            class ZeroResponseContext : IMessageContext
+        private class ZeroResponseContext : IMessageContext
+        {
+            private readonly ResponseMessageContext _originalMessageContext;
+
+            public ResponseMessageContext OriginalMessageContext
             {
-                private readonly ResponseMessageContext _originalMessageContext;
+                get { return _originalMessageContext; }
+            }
 
-                public ResponseMessageContext OriginalMessageContext
+            public ZeroResponseContext(ResponseMessageContext originalMessageContext)
+            {
+                _originalMessageContext = originalMessageContext;
+            }
+
+            public string Path { get; set; }
+
+            public void Response(object message)
+            {
+                throw new NotSupportedException("Response not supported for this message.");
+            }
+        }
+
+        private class CompositeHandler : IMessageHandler
+        {
+            private readonly HashSet<ResponseMessageContext> _responseContexts = new HashSet<ResponseMessageContext>();
+            private readonly Dictionary<string, List<IMessageHandler>> _handlers = new Dictionary<string, List<IMessageHandler>>(); 
+
+            public bool TryHandle(object message, IMessageContext context)
+            {
+                var zeroResponseContext =  context as ZeroResponseContext;
+                if (zeroResponseContext != null)
+                    if(TryHandleResponse(message, zeroResponseContext)) return true;
+
+                List<IMessageHandler> handlers;
+                if (_handlers.TryGetValue(context.Path, out handlers))
                 {
-                    get { return _originalMessageContext; }
+                    foreach (var messageHandler in handlers)
+                    {
+                        if (messageHandler.TryHandle(message, context)) return true;
+                    }
                 }
+                return false;
+            }
 
-                public ZeroResponseContext(ResponseMessageContext originalMessageContext)
+            public IDisposable AddHandler<T>(MessageHandler<T> handler)
+            {
+                List<IMessageHandler> handlers;
+                if (!_handlers.TryGetValue(handler.Path, out handlers))
                 {
-                    _originalMessageContext = originalMessageContext;
+                    handlers = new List<IMessageHandler>();
+                    _handlers.Add(handler.Path, handlers);
                 }
+                handlers.Add(handler);
+                return new AnonymousDisposer(() => handlers.Remove(handler));
+            }
 
-                public string Path { get; set; }
+            public IDisposable AddResponseHandler(ResponseMessageContext orignalMessageContext)
+            {
+                _responseContexts.Add(orignalMessageContext);
+                return new AnonymousDisposer(() => _responseContexts.Remove(orignalMessageContext));
+            }
 
-                public void Response(object message)
+            private bool TryHandleResponse(object message, ZeroResponseContext zeroResponseContext)
+            {
+                if (_responseContexts.Contains(zeroResponseContext.OriginalMessageContext))
                 {
-                    throw new NotSupportedException("Response not supported for this message.");
+                    zeroResponseContext.OriginalMessageContext.Consume(message, zeroResponseContext);
+                    return true;
                 }
+                return false;
             }
         }
     }

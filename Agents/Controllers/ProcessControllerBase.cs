@@ -22,7 +22,7 @@ namespace Agents.Controllers
 
         public IScheduler Scheduler
         {
-            get { return _process.Scheduler; }
+            get { return _process.Dispatcher; }
         }
 
         public IMessageBus MessageBus

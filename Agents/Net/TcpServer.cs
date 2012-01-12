@@ -47,7 +47,7 @@ namespace Agents.Net
         private void BuildNewListenerProcess(TcpClient client)
         {
             var process = _processManager.BuildProcess();
-            process.Scheduler.Schedule(
+            process.Dispatcher.Schedule(
                 () =>
                     {
                         Logger.Trace("Started new TCP process.");

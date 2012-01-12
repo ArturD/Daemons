@@ -13,7 +13,7 @@ namespace Agents.Controllers
         {
             var controller = Constuct(controllerType);
             controller.Process = process;
-            process.Scheduler.Schedule(controller.Initialize);
+            process.Dispatcher.Schedule(controller.Initialize);
             return controller;
         }
     }

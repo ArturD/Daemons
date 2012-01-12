@@ -6,21 +6,26 @@ using Agents.Net;
 
 namespace Agents.Web
 {
-    public class HttpConnection
+    public class HttpResponse
     {
         private TcpConnection _connection;
 
-        public HttpConnection(TcpConnection connection)
+        public HttpResponse(TcpConnection connection)
         {
             _connection = connection;
         }
 
-        public void Write(string response, Action continuation)
+        public void WriteAndShutdown(string response)
         {
-            Write(response, Encoding.ASCII, continuation);
+            WriteAndShutdown(response, () => {});
         }
 
-        public void Write(string response, Encoding contentEncoder, Action continuation)
+        public void WriteAndShutdown(string response, Action continuation)
+        {
+            WriteAndShutdown(response, Encoding.ASCII, continuation);
+        }
+
+        public void WriteAndShutdown(string response, Encoding contentEncoder, Action continuation)
         {
             if (response == null) throw new ArgumentNullException("response");
             if (contentEncoder == null) throw new ArgumentNullException("contentEncoder");
@@ -37,7 +42,7 @@ namespace Agents.Web
             var buffer = new byte[byteHeaders.Length + byteContent.Length];
             byteHeaders.CopyTo(buffer, 0);
             byteContent.CopyTo(buffer, byteHeaders.Length);
-            Write(buffer, continuation);
+            WriteAndShutdown(buffer, continuation);
         }
 
         public void Close()
@@ -45,17 +50,22 @@ namespace Agents.Web
             _connection.Process.Shutdown();
         }
 
-        private void Write(byte[] bytes)
+        public void WriteAndShutdown(byte[] bytes)
         {
-            Write(bytes, () => { });
+            WriteAndShutdown(bytes, () => _connection.Process.Shutdown());
         }
 
-        private void Write(byte[] bytes, Action continuation)
+        public void Write(byte[] bytes)
         {
-            _connection.WriteAsync(bytes, 0, bytes.Length, continuation);
+            WriteAndShutdown(bytes, () => { });
         }
 
-        private void WriteHeaders(IEnumerable<KeyValuePair<string, string>> headers)
+        private void WriteAndShutdown(byte[] bytes, Action continuation)
+        {
+            _connection.WriteAsync(bytes, 0, bytes.Length, () => { continuation(); _connection.Process.Shutdown(); });
+        }
+
+        public void WriteHeaders(IEnumerable<KeyValuePair<string, string>> headers)
         {
             var str = FormatHeaders(headers);
 

@@ -21,7 +21,7 @@ namespace Agents.Tests.Util
         [Timeout(20000)]
         public void ConcurrentAddAndTestTest()
         {
-            int size = 1000000;
+            int size = 1000;
             int[] correct = new int[size];
 
             var queue = new WaitQueue<int>();

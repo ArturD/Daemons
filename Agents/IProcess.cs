@@ -5,7 +5,7 @@ namespace Agents
 {
     public interface IProcess
     {
-        IScheduler Scheduler { get; }
+        IScheduler Dispatcher { get; }
         IMessageEndpoint MessageEndpoint { get; }
         IMessageBus MessageBus { get; }
         IDisposable OnMessage<TMessage>(string path, Action<TMessage, IMessageContext> action);

@@ -15,14 +15,13 @@ namespace Agents.HttpSimpleExample
         {
             using (var processManager = new ProcessManager())
             {
-                processManager.BuildProcess(
-                    serverProcess =>
+                processManager.BuildHttpServerProcess(
+                    (serverProcess, server) =>
                         {
-                            var server = processManager.BuildHttpServer(serverProcess);
                             server.Listen(new IPEndPoint(IPAddress.Any, 1234),
-                                          (process, http) =>
+                                          (process, request, response) =>
                                               {
-                                                  http.Write("Hello !", process.Shutdown);
+                                                  response.WriteAndShutdown(string.Format("Hello ! \nfrom {0} {1}", request.MethodVerb, request.Path));
                                               });
                         });
                 Console.ReadLine();

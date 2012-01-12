@@ -30,9 +30,9 @@ namespace Agents.Tests.Util
             }
             for (int i = 0; i < size; i++)
             {
-                var result = queue.TakeNoWait();
-                Assert.IsTrue(result.Success);
-                Assert.AreEqual(i, result.Value);
+                int result;
+                Assert.IsTrue(queue.TryTake(out result));
+                Assert.AreEqual(i, result);
             }
         }
 
@@ -49,9 +49,9 @@ namespace Agents.Tests.Util
             }
             for (int i = 0; i < size; i++)
             {
-                var result = queue.TakeNoWait();
-                Assert.IsTrue(result.Success);
-                Assert.AreEqual(i, result.Value);
+                int result;
+                Assert.IsTrue(queue.TryTake(out result));
+                Assert.AreEqual(i, result);
             }
         }
 
@@ -77,10 +77,10 @@ namespace Agents.Tests.Util
             {
                 while (true)
                 {
-                    var result = queue.TakeNoWait();
-                    if (result.Success)
+                    int result;
+                    if (queue.TryTake(out result))
                     {
-                        correct[result.Value]++;
+                        correct[result]++;
                         break;
                     }
                 }

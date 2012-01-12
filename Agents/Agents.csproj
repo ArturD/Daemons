@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Barrier.cs" />
+    <Compile Include="CompositeHandler.cs" />
     <Compile Include="Controllers\ControllerFactory.cs" />
     <Compile Include="Controllers\IController.cs" />
     <Compile Include="Controllers\IControllerFactory.cs" />
@@ -55,6 +56,8 @@
     <Compile Include="IFuture.cs" />
     <Compile Include="IMessageEndpoint.cs" />
     <Compile Include="IMessageHandler.cs" />
+    <Compile Include="IO\StreamExtensions.cs" />
+    <Compile Include="IO\StreamWritterExtensions.cs" />
     <Compile Include="IProcess.cs" />
     <Compile Include="IProcessManager.cs" />
     <Compile Include="ISynchedFuture.cs" />
@@ -64,9 +67,9 @@
     <Compile Include="MessageBus\IMessageBusFactory.cs" />
     <Compile Include="MessageBus\UnicastMessageBusFactory.cs" />
     <Compile Include="NotInDaemonContextException.cs" />
-    <Compile Include="ProcessDispatcherWrapper.cs" />
     <Compile Include="ProcessManagerExtensions.cs" />
     <Compile Include="Util\AnonymousDisposer.cs" />
+    <Compile Include="Web\HttpRequest.cs" />
     <Compile Include="ZeroResponseContext.cs" />
     <Compile Include="MessageBus\UnicastMessageBus.cs" />
     <Compile Include="MessageContext.cs" />
@@ -83,7 +86,7 @@
     <Compile Include="SharedAction.cs" />
     <Compile Include="Util\NoWaitQueue.cs" />
     <Compile Include="Util\WaitQueue.cs" />
-    <Compile Include="Web\HttpConnection.cs" />
+    <Compile Include="Web\HttpResponse.cs" />
     <Compile Include="Web\HttpServer.cs" />
     <Compile Include="Web\HttpServers.cs" />
   </ItemGroup>

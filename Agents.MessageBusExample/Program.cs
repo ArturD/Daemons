@@ -21,7 +21,12 @@ namespace Agents.MessageBusExample
                             process2 =>
                                 {
                                     process2.MessageBus.Publish("/shutdown/signal", "kill")
-                                        .ExpectResponse((message, context) => process.Shutdown());
+                                        .ExpectResponse((message, context) =>
+                                                            {
+                                                                Console.WriteLine("Response: " + message);
+                                                                process.Shutdown();
+                                                                processFactory.Dispose();
+                                                            });
                                     Console.WriteLine("Sending kill");
                                 });
                     });

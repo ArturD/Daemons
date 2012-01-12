@@ -10,10 +10,5 @@ namespace Agents
         {
             return new DefaultScheduler(threads);
         }
-
-        public static DefaultSchedulerDispatcher BuildDispatcher(this DefaultScheduler scheduler)
-        {
-            return new DefaultSchedulerDispatcher(scheduler);
-        }
     }
 }

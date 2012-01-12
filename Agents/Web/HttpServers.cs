@@ -12,5 +12,14 @@ namespace Agents.Web
             var server = new HttpServer(process, processManager);
             return server;
         }
+
+        public static void BuildHttpServerProcess(this IProcessManager processManager, Action<IProcess, HttpServer> initAction)
+        {
+            processManager.BuildProcess(process =>
+                                            {
+                                                var server = new HttpServer(process, processManager);
+                                                initAction(process, server);
+                                            });
+        }
     }
 }

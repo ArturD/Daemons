@@ -9,16 +9,14 @@ namespace Agents
 {
     public static class Daemons
     {
-        private static readonly ThreadLocal<Stack<IProcess>> CurrentStack 
-            = new ThreadLocal<Stack<IProcess>>(() => new Stack<IProcess>());
+        [ThreadStatic] private static Stack<IProcess> _currentStack;
 
         public static IProcess CurrentOrNull
         {
             get
             {
-                var stack = CurrentStack.Value;
-                if(stack.Count == 0) return null;
-                return stack.Peek();
+                if (_currentStack == null || _currentStack.Count == 0) return null;
+                return _currentStack.Peek();
             }
         }
 
@@ -29,17 +27,27 @@ namespace Agents
         {
             get
             {
-                var stack = CurrentStack.Value;
-                if (stack.Count == 0) throw new NotInDaemonContextException();
-                return stack.Peek();
+                if (_currentStack == null || _currentStack.Count == 0) throw new NotInDaemonContextException();
+                return _currentStack.Peek();
             }
         }
 
         public static IDisposable Use(IProcess process)
         {
             if (process == null) throw new ArgumentNullException("process");
-            CurrentStack.Value.Push(process);
-            return new AnonymousDisposer(() => CurrentStack.Value.Pop());
+            if(_currentStack == null) _currentStack = new Stack<IProcess>();
+            _currentStack.Push(process);
+            return UseDisposer.Instance;
+        }
+
+        private class UseDisposer : IDisposable
+        {
+            public static UseDisposer Instance = new UseDisposer();
+
+            public void Dispose()
+            {
+                _currentStack.Pop();
+            }
         }
     }
 }

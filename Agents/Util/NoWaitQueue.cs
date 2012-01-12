@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +8,7 @@ using System.Threading;
 
 namespace Agents.Util
 {
-    public class NoWaitQueue<TValue>
+    public class NoWaitQueue<TValue> : IProducerConsumerCollection<TValue>
     {
         private Node _first = new Node();
         private Node _last;
@@ -31,7 +33,7 @@ namespace Agents.Util
             }
         }
 
-        public TakeNoWaitResult TakeNoWait()
+        public bool TryTake(out TValue val)
         {
             while (true)
             {
@@ -39,50 +41,83 @@ namespace Agents.Util
                 var first = preFirst.Next;
                 if (first == null)
                 {
-                    return new TakeNoWaitResult()
-                               {
-                                   Value = default(TValue),
-                                   Success = false,
-                               };
+                    val = default(TValue);
+                    return false;
                 }
-                if (first.Remove())
+                if (Interlocked.CompareExchange(ref _first, first, preFirst) == preFirst)
                 {
-                    Interlocked.CompareExchange(ref _first, first, preFirst);
-                    return new TakeNoWaitResult()
-                               {
-                                   Value = first.Value,
-                                   Success = true,
-                               };
-                }
-                else
-                {
-                    // make progres if queue is stale
-                    Interlocked.CompareExchange(ref _first, first, preFirst);
+                    val = first.Value;
+                    return true;
                 }
             }
-        }
-
-        public struct TakeNoWaitResult
-        {
-            public TValue Value { get; set; }
-            public bool Success { get; set; }
         }
 
         public class Node
         {
             public TValue Value { get; set; }
-            internal int OnQueueFlag = 1;
+            //internal int OnQueueFlag = 1;
             internal Node Next;
 
-            public bool OnQueue
-            {
-                get { return OnQueueFlag == 1; }
-            }
+            //public bool OnQueue
+            //{
+            //    get { return OnQueueFlag == 1; }
+            //}
 
-            public bool Remove()
+            //public bool Remove()
+            //{
+            //    if (OnQueueFlag == 0) return false;
+            //    return Interlocked.Exchange(ref OnQueueFlag, 0) == 1;
+            //}
+        }
+
+        public IEnumerator<TValue> GetEnumerator()
+        {
+            TValue val = default(TValue);
+            while(TryTake(out val))
             {
-                return Interlocked.Exchange(ref OnQueueFlag, 0) == 1;
+                yield return val;
             }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public void CopyTo(Array array, int index)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int Count
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public object SyncRoot
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public bool IsSynchronized
+        {
+            get { return false; }
+        }
+
+        public void CopyTo(TValue[] array, int index)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool TryAdd(TValue item)
+        {
+            Add(item);
+            return true;
+        }
+
+        public TValue[] ToArray()
+        {
+            return this.AsEnumerable().ToArray();
         }
     }
 
