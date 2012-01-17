@@ -12,6 +12,16 @@ namespace Agents.Net
         private readonly IProcess _process;
         private readonly NetworkStream _stream;
 
+        public TcpClient Client
+        {
+            get { return _client; }
+        }
+
+        public NetworkStream Stream
+        {
+            get { return _stream; }
+        }
+
         public TcpConnection(TcpClient client, IProcess process)
         {
             _client = client;

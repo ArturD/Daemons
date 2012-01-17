@@ -8,7 +8,7 @@ namespace Agents.Web
 {
     public class HttpRequest
     {
-        private static readonly Regex FirstLine = new Regex(@"([a-zA-Z]*) ([a-zA-Z:/0-9~%]*) .*", RegexOptions.Compiled);
+        private static readonly Regex FirstLine = new Regex(@"([a-zA-Z]*) ([a-zA-Z:/0-9~%.,?]*) .*", RegexOptions.Compiled);
         private static readonly Regex Header = new Regex(@"([a-zA-Z]*):[ ]*(.*)", RegexOptions.Compiled);
 
         public static HttpRequest Create(IEnumerable<string> lines)

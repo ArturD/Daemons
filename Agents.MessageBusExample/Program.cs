@@ -10,6 +10,7 @@ namespace Agents.MessageBusExample
             processFactory.BuildProcess(
                 process =>
                     {
+					// główny process
                         process.OnShutdown(processFactory.Dispose);
                         process.MessageBus.Subscribe<string>(
                             "/shutdown/signal", (m, c) =>
@@ -17,15 +18,19 @@ namespace Agents.MessageBusExample
                                         Console.WriteLine("Recived {0}", m);
                                         c.Response("agree");
                                     });
+									
                         processFactory.BuildProcess(
                             process2 =>
                                 {
+									// proces prosi o pozwolenie na zamknięcie apliakcji 
                                     process2.MessageBus.Publish("/shutdown/signal", "kill")
                                         .ExpectResponse((message, context) =>
                                                             {
                                                                 Console.WriteLine("Response: " + message);
-                                                                process.Shutdown();
-                                                                processFactory.Dispose();
+																
+																if(message == "agree") {
+																	processFactory.Dispose();
+																}
                                                             });
                                     Console.WriteLine("Sending kill");
                                 });

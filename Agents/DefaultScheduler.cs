@@ -60,9 +60,15 @@ namespace Agents
             ScheduleInterval(action, delay, delay);
         }
 
-        public void ScheduleInterval(Action action, TimeSpan dueTime, TimeSpan delay)
+        public void ScheduleInterval(Action action, TimeSpan dueTime, TimeSpan period)
         {
-            var timer = new Timer((cb) => action(), null, delay, new TimeSpan(-1));
+            var timer = new Timer(ExecuteAction, action, dueTime, period);
+        }
+
+        private static void ExecuteAction(object actionObject)
+        {
+            Action action = (Action) actionObject;
+            action();
         }
 
         public void Stop()
@@ -81,7 +87,7 @@ namespace Agents
         }
     }
 
-    internal class DefaultScheduledAction : IScheduledAction
+    internal class DefaultScheduledAction
     {
         private readonly Action _action;
 
@@ -94,9 +100,5 @@ namespace Agents
         {
             _action();
         }
-    }
-
-    public interface IScheduledAction
-    {
     }
 }

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Net;
-using System.Text;
+using Agents.IO;
 using Agents.Web;
 using NLog;
 
@@ -18,10 +18,26 @@ namespace Agents.HttpSimpleExample
                 processManager.BuildHttpServerProcess(
                     (serverProcess, server) =>
                         {
+                            Logger.Info("initialize http server !");
                             server.Listen(new IPEndPoint(IPAddress.Any, 1234),
                                           (process, request, response) =>
                                               {
-                                                  response.WriteAndShutdown(string.Format("Hello ! \nfrom {0} {1}", request.MethodVerb, request.Path));
+                                                  if (request.Path == "/index.html")
+                                                  {
+                                                      response.WriteHeaders(new Dictionary<string, string>() { {"content-type", "text/html"}});
+                                                      var stream = File.OpenRead("index.html");
+                                                      stream.Pipe(response.Stream, ()=>
+                                                                                       {
+                                                                                           stream.Dispose();
+                                                                                           process.Shutdown();
+                                                                                       });
+                                                  }
+                                                  else
+                                                  {
+                                                      response.WriteAndShutdown(string.Format("Hello ! \nfrom {0} {1}",
+                                                                                              request.MethodVerb,
+                                                                                              request.Path));
+                                                  }
                                               });
                         });
                 Console.ReadLine();

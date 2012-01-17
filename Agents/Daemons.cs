@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using Agents.Util;
 
 namespace Agents
 {
@@ -29,6 +25,16 @@ namespace Agents
             {
                 if (_currentStack == null || _currentStack.Count == 0) throw new NotInDaemonContextException();
                 return _currentStack.Peek();
+            }
+        }
+
+        public static IScheduler CurrentScheduler
+        {
+            get
+            { 
+                var process = Current;
+                if (process == null) return ThreadPoolScheduler.Instance;
+                return process.Dispatcher;
             }
         }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Agents.Net;
@@ -10,9 +11,12 @@ namespace Agents.Web
     {
         private TcpConnection _connection;
 
+        public Stream Stream { get; private set; }
+
         public HttpResponse(TcpConnection connection)
         {
             _connection = connection;
+            Stream = new HttpResponseStream(connection);
         }
 
         public void WriteAndShutdown(string response)

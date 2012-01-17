@@ -113,6 +113,7 @@ namespace Agents.Web
                         process.OnShutdown(() =>
                                                {
                                                    //connection.Process.Shutdown();
+                                                   connection.Stream.Flush();
                                                    KeepAlive(buffer, connection);
                                                    Logger.Debug("Ending http request processing {0}", (DateTime.UtcNow - startTime).TotalMilliseconds);
                                                });
