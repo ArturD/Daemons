@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{23D987F1-5E60-44AE-B497-F3725AE9DDE9}</ProjectGuid>
+    <ProjectGuid>{44B910D7-5EF2-406E-9DE3-4EBC5F401B2D}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Agents.SimpleExample</RootNamespace>
-    <AssemblyName>Agents.SimpleExample</AssemblyName>
+    <RootNamespace>Agents.MessagePerformanceTest</RootNamespace>
+    <AssemblyName>Agents.MessagePerformanceTest</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>

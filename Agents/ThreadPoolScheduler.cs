@@ -24,9 +24,9 @@ namespace Agents
             var timer = new Timer((cb) => action(), null, delay, new TimeSpan(-1));
         }
 
-        public void ScheduleInterval(Action action, TimeSpan delay)
+        public void ScheduleInterval(Action action, TimeSpan period)
         {
-            ScheduleInterval(action, delay, delay);
+            ScheduleInterval(action, period, period);
         }
 
         public void ScheduleInterval(Action action, TimeSpan dueTime, TimeSpan period)
@@ -34,9 +34,9 @@ namespace Agents
             var timer = new Timer(ExecuteAction, action, dueTime, period);
         }
 
-        private static void ExecuteAction(object actionObject)
+        private static void ExecuteAction(object actionAsObject)
         {
-            Action action = (Action)actionObject;
+            var action = (Action)actionAsObject;
             action();
         }
 

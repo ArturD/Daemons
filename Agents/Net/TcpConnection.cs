@@ -9,7 +9,7 @@ namespace Agents.Net
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly TcpClient _client;
-        private readonly IProcess _process;
+        private readonly IDaemon _daemon;
         private readonly NetworkStream _stream;
 
         public TcpClient Client
@@ -22,10 +22,10 @@ namespace Agents.Net
             get { return _stream; }
         }
 
-        public TcpConnection(TcpClient client, IProcess process)
+        public TcpConnection(TcpClient client, IDaemon daemon)
         {
             _client = client;
-            _process = process;
+            _daemon = daemon;
             _stream = _client.GetStream();
            
         }
@@ -38,7 +38,7 @@ namespace Agents.Net
                 var read = _stream.Read(buffer, offset, count);
                 if(Logger.IsTraceEnabled) Logger.Trace("Read data synchronously {0}", read);
 
-                _process.Dispatcher.Schedule(
+                _daemon.Schedule(
                     () => endAction(read));
 
             }
@@ -46,13 +46,13 @@ namespace Agents.Net
             try
             {
                 _stream.BeginRead(buffer, offset, count,
-                                  asyncResult => _process.Dispatcher.Schedule(
+                                  asyncResult => _daemon.Schedule(
                                       () => HandleEndRead(endAction, asyncResult)), null);
             }
             catch (IOException exception)
             {
                 Logger.TraceException("Connection Reset by Peer", exception);
-                _process.Shutdown();
+                _daemon.Shutdown();
             }
         }
 
@@ -69,7 +69,7 @@ namespace Agents.Net
             catch (IOException exception)
             {
                 Logger.TraceException("Connection Reset by Peer", exception);
-                _process.Shutdown();
+                _daemon.Shutdown();
             }
             catch (Exception exception)
             {
@@ -78,7 +78,7 @@ namespace Agents.Net
                     exception);
                 throw;
             }
-            if(read == 0) _process.Shutdown();
+            if(read == 0) _daemon.Shutdown();
             else endAction(read);
         }
 
@@ -90,7 +90,7 @@ namespace Agents.Net
             {
                 _stream.BeginWrite(buffer, offset, count,
                                    asyncResult =>
-                                   _process.Dispatcher.Schedule(
+                                   _daemon.Schedule(
                                        () =>
                                            {
                                                if (Logger.IsTraceEnabled)
@@ -104,7 +104,7 @@ namespace Agents.Net
             catch (IOException exception)
             {
                 Logger.TraceException("Connection Reset by Peer", exception);
-                _process.Shutdown();
+                _daemon.Shutdown();
             }
             catch (ObjectDisposedException exception)
             {
@@ -117,9 +117,9 @@ namespace Agents.Net
             get { return _client.Client.Connected; }
         }
 
-        public IProcess Process
+        public IDaemon Daemon
         {
-            get { return _process; }
+            get { return _daemon; }
         }
 
         public void Close()

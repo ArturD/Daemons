@@ -13,7 +13,7 @@ namespace Agents
     public class DefaultScheduler : IScheduler
     {
         private List<Thread> _threads;
-        private WaitQueue<DefaultScheduledAction> _actions = new WaitQueue<DefaultScheduledAction>();
+        private WaitQueue<Action> _actions = new WaitQueue<Action>();
         private bool _stopping = false;
  
         public DefaultScheduler(int numberOfThreads)
@@ -39,14 +39,13 @@ namespace Agents
                 if (_stopping) break;
                 var action = _actions.Take();
                 if(_stopping) break;
-                action.Execute();
+                action();
             }
         }
 
         public void Schedule(Action action)
         {
-            var scheduledAction = new DefaultScheduledAction(action);
-            _actions.Add(scheduledAction);
+            _actions.Add(action);
             //return scheduledAction;
         }
 
@@ -55,9 +54,9 @@ namespace Agents
             var timer = new Timer((cb)=> action(), null, delay, new TimeSpan(-1));
         }
 
-        public void ScheduleInterval(Action action, TimeSpan delay)
+        public void ScheduleInterval(Action action, TimeSpan period)
         {
-            ScheduleInterval(action, delay, delay);
+            ScheduleInterval(action, period, period);
         }
 
         public void ScheduleInterval(Action action, TimeSpan dueTime, TimeSpan period)
@@ -77,28 +76,13 @@ namespace Agents
             foreach (var thread in _threads)
             {
                 // add dummy action to ensure cycle in thread
-                _actions.Add(new DefaultScheduledAction(() => { }));
+                _actions.Add(() => { });
             }
         }
 
         public void Dispose()
         {
             Stop();
-        }
-    }
-
-    internal class DefaultScheduledAction
-    {
-        private readonly Action _action;
-
-        public DefaultScheduledAction(Action action)
-        {
-            this._action = action;
-        }
-
-        public void Execute()
-        {
-            _action();
         }
     }
 }

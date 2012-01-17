@@ -8,18 +8,18 @@ namespace Agents.Net
     public class TcpServer
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        private readonly IProcess _process;
-        private readonly IProcessManager _processManager;
+        private readonly IDaemon _daemon;
+        private readonly IDaemonFactory _daemonFactory;
         private TcpListener _listener = null;
-        private Action<IProcess, TcpConnection> _processInitializator;
+        private Action<IDaemon, TcpConnection> _processInitializator;
 
-        public TcpServer(IProcess process, IProcessManager processManager)
+        public TcpServer(IDaemon daemon, IDaemonFactory daemonFactory)
         {
-            _process = process;
-            _processManager = processManager;
+            _daemon = daemon;
+            _daemonFactory = daemonFactory;
         }
 
-        public void Listen(IPEndPoint endpoint, Action<IProcess, TcpConnection> processInitializator)
+        public void Listen(IPEndPoint endpoint, Action<IDaemon, TcpConnection> processInitializator)
         {
             if(_listener != null)
                 throw new InvalidOperationException("Listen Called second time."); // todo make me more verbose
@@ -46,8 +46,8 @@ namespace Agents.Net
 
         private void BuildNewListenerProcess(TcpClient client)
         {
-            var process = _processManager.BuildProcess();
-            process.Dispatcher.Schedule(
+            var process = _daemonFactory.BuildDaemon();
+            process.Schedule(
                 () =>
                     {
                         Logger.Trace("Started new TCP process.");

@@ -9,11 +9,11 @@ namespace Agents.Controllers
             return (IController) Activator.CreateInstance(controllerType);
         }
 
-        public virtual IController Build(Type controllerType, IProcess process)
+        public virtual IController Build(Type controllerType, IDaemon daemon)
         {
             var controller = Constuct(controllerType);
-            controller.Process = process;
-            process.Dispatcher.Schedule(controller.Initialize);
+            controller.Daemon = daemon;
+            daemon.Schedule(controller.Initialize);
             return controller;
         }
     }

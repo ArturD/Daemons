@@ -51,12 +51,12 @@ namespace Agents.Web
 
         public void Close()
         {
-            _connection.Process.Shutdown();
+            _connection.Daemon.Shutdown();
         }
 
         public void WriteAndShutdown(byte[] bytes)
         {
-            WriteAndShutdown(bytes, () => _connection.Process.Shutdown());
+            WriteAndShutdown(bytes, () => _connection.Daemon.Shutdown());
         }
 
         public void Write(byte[] bytes)
@@ -66,7 +66,7 @@ namespace Agents.Web
 
         private void WriteAndShutdown(byte[] bytes, Action continuation)
         {
-            _connection.WriteAsync(bytes, 0, bytes.Length, () => { continuation(); _connection.Process.Shutdown(); });
+            _connection.WriteAsync(bytes, 0, bytes.Length, () => { continuation(); _connection.Daemon.Shutdown(); });
         }
 
         public void WriteHeaders(IEnumerable<KeyValuePair<string, string>> headers)

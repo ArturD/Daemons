@@ -5,9 +5,9 @@ namespace Agents
 {
     public static class Daemons
     {
-        [ThreadStatic] private static Stack<IProcess> _currentStack;
+        [ThreadStatic] private static Stack<IDaemon> _currentStack;
 
-        public static IProcess CurrentOrNull
+        public static IDaemon CurrentOrNull
         {
             get
             {
@@ -19,7 +19,7 @@ namespace Agents
         /// <summary>
         /// <exception cref="NotInDaemonContextException"></exception>
         /// </summary>
-        public static IProcess Current
+        public static IDaemon Current
         {
             get
             {
@@ -32,17 +32,17 @@ namespace Agents
         {
             get
             { 
-                var process = Current;
-                if (process == null) return ThreadPoolScheduler.Instance;
-                return process.Dispatcher;
+                var daemon = Current;
+                if (daemon == null) return ThreadPoolScheduler.Instance;
+                return daemon;
             }
         }
 
-        public static IDisposable Use(IProcess process)
+        public static IDisposable Use(IDaemon daemon)
         {
-            if (process == null) throw new ArgumentNullException("process");
-            if(_currentStack == null) _currentStack = new Stack<IProcess>();
-            _currentStack.Push(process);
+            if (daemon == null) throw new ArgumentNullException("daemon");
+            if(_currentStack == null) _currentStack = new Stack<IDaemon>();
+            _currentStack.Push(daemon);
             return UseDisposer.Instance;
         }
 

@@ -16,7 +16,7 @@ namespace Agents.IO
                              asyncResult =>
                                  {
                                      int read = stream.EndRead(asyncResult);
-                                     ((IProcess) asyncResult.AsyncState).Dispatcher.Schedule(() => continuation(read));
+                                     ((IDaemon) asyncResult.AsyncState).Schedule(() => continuation(read));
                                  }, daemon);
         }
 
@@ -28,7 +28,7 @@ namespace Agents.IO
                              asyncResult =>
                              {
                                  stream.EndWrite(asyncResult);
-                                 ((IProcess)asyncResult.AsyncState).Dispatcher.Schedule(continuation);
+                                 ((IDaemon)asyncResult.AsyncState).Schedule(continuation);
                              }, daemon);
         }
 

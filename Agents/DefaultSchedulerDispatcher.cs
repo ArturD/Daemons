@@ -13,17 +13,17 @@ namespace Agents
     public class DefaultSchedulerDispatcher : IDisposable, IScheduler
     {
         private readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        private readonly IProcess _process;
-        private readonly IProducerConsumerCollection<Action> _queue = new NoWaitQueue<Action>();
+        private readonly IDaemon _daemon;
+        private readonly IProducerConsumerCollection<Action> _queue = new NoWaitProducerConsumerCollection<Action>();
         private readonly IScheduler _scheduler;
         private int _elementCounter = 0;
         private volatile int _executing = 0;
         private bool _disposed = false;
 
-        public DefaultSchedulerDispatcher(IScheduler scheduler, IProcess process)
+        public DefaultSchedulerDispatcher(IScheduler scheduler, IDaemon daemon)
         {
             _scheduler = scheduler;
-            _process = process;
+            _daemon = daemon;
         }
 
         public void Schedule(Action action)
@@ -35,7 +35,7 @@ namespace Agents
             {
                 Logger.Trace("Executing action by stilling thread.");
                 // still thread
-                using (Daemons.Use(_process))
+                using (Daemons.Use(_daemon))
                 {
                     action();
                 }
@@ -57,9 +57,9 @@ namespace Agents
             _scheduler.ScheduleOne(() => Schedule(action), delay);
         }
 
-        public void ScheduleInterval(Action action, TimeSpan delay)
+        public void ScheduleInterval(Action action, TimeSpan period)
         {
-            _scheduler.ScheduleInterval(() => Schedule(action), delay);
+            _scheduler.ScheduleInterval(() => Schedule(action), period);
         }
 
         private void DoOne()
@@ -71,7 +71,7 @@ namespace Agents
                 {
                     if (_disposed) return;
 
-                    using (Daemons.Use(_process))
+                    using (Daemons.Use(_daemon))
                     {
                         action();
                     }

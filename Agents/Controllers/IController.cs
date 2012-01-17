@@ -2,7 +2,7 @@ namespace Agents.Controllers
 {
     public interface IController
     {
-        IProcess Process { get; set; }
+        IDaemon Daemon { get; set; }
         void Initialize();
     }
 }

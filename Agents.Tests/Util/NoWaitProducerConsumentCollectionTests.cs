@@ -10,7 +10,7 @@ using NUnit.Framework;
 namespace Agents.Tests.Util
 {
     [TestFixture]
-    public class NoWaitQueueTests
+    public class NoWaitProducerConsumentCollectionTests
     {
         private static IEnumerable<int> Range(int n)
         {
@@ -23,7 +23,7 @@ namespace Agents.Tests.Util
         {
             int size = 100;
 
-            var queue = new NoWaitQueue<int>();
+            var queue = new NoWaitProducerConsumerCollection<int>();
             foreach(var i in Range(size))
             {
                 queue.Add(i);
@@ -42,7 +42,7 @@ namespace Agents.Tests.Util
         {
             int size = 1000;
 
-            var queue = new NoWaitQueue<int>();
+            var queue = new NoWaitProducerConsumerCollection<int>();
             foreach (var i in Range(size).AsParallel())
             {
                 queue.Add(i);
@@ -63,7 +63,7 @@ namespace Agents.Tests.Util
             int size = 100000;
             int[] correct = new int[size];
 
-            var queue = new NoWaitQueue<int>();
+            var queue = new NoWaitProducerConsumerCollection<int>();
             ThreadPool.QueueUserWorkItem(
                 x =>
                     {

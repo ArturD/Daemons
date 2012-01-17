@@ -12,25 +12,25 @@ namespace Agents.Web
     public class HttpServer
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        private readonly IProcessManager _processManager;
+        private readonly IDaemonFactory _daemonFactory;
         internal const string HttpNewLine = "\r\n";
         private static readonly Regex Endline = new Regex(HttpNewLine);
         private readonly TcpServer _tcpServer;
-        private Action<IProcess, HttpRequest, HttpResponse> _httpProcessInitializer;
+        private Action<IDaemon, HttpRequest, HttpResponse> _httpProcessInitializer;
 
-        public HttpServer(IProcess process, IProcessManager processManager)
+        public HttpServer(IDaemon daemon, IDaemonFactory daemonFactory)
         {
-            _processManager = processManager;
-            _tcpServer = new TcpServer(process, processManager);
+            _daemonFactory = daemonFactory;
+            _tcpServer = new TcpServer(daemon, daemonFactory);
         }
 
-        public void Listen(IPEndPoint endpoint, Action<IProcess, HttpRequest, HttpResponse> httpProcessInitializer)
+        public void Listen(IPEndPoint endpoint, Action<IDaemon, HttpRequest, HttpResponse> httpProcessInitializer)
         {
             _tcpServer.Listen(endpoint, TcpProcess);
             _httpProcessInitializer = httpProcessInitializer;
         }
 
-        private void TcpProcess(IProcess process, TcpConnection connection)
+        private void TcpProcess(IDaemon daemon, TcpConnection connection)
         {
             Buffer buffer =
                 new Buffer()
@@ -104,8 +104,8 @@ namespace Agents.Web
 
         private void StartHttp(string[] headers, byte[] buffer, TcpConnection connection)
         {
-            var process = _processManager.BuildProcess();
-            process.Dispatcher.Schedule(
+            var process = _daemonFactory.BuildDaemon();
+            process.Schedule(
                 ()=>
                     {
                         Logger.Debug("Staring http request processing :"+ headers[0]);

@@ -47,53 +47,43 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Barrier.cs" />
-    <Compile Include="CompositeHandler.cs" />
     <Compile Include="Controllers\ControllerFactory.cs" />
     <Compile Include="Controllers\IController.cs" />
     <Compile Include="Controllers\IControllerFactory.cs" />
     <Compile Include="Controllers\ProcessControllerBase.cs" />
     <Compile Include="Daemons.cs" />
-    <Compile Include="IFuture.cs" />
-    <Compile Include="IMessageEndpoint.cs" />
-    <Compile Include="IMessageHandler.cs" />
     <Compile Include="IO\StreamExtensions.cs" />
     <Compile Include="IO\StreamPipe.cs" />
     <Compile Include="IO\StreamWritterExtensions.cs" />
-    <Compile Include="IProcess.cs" />
-    <Compile Include="IProcessManager.cs" />
-    <Compile Include="ISynchedFuture.cs" />
+    <Compile Include="IDaemon.cs" />
+    <Compile Include="IDaemonFactory.cs" />
+    <Compile Include="IPublisher.cs" />
+    <Compile Include="ISubscriber.cs" />
+    <Compile Include="ISubscribtion.cs" />
+    <Compile Include="ITopic.cs" />
     <Compile Include="MessageBus\IMessageBus.cs" />
-    <Compile Include="IMessageContext.cs" />
-    <Compile Include="IResponseContext.cs" />
-    <Compile Include="MessageBus\IMessageBusFactory.cs" />
-    <Compile Include="MessageBus\UnicastMessageBusFactory.cs" />
     <Compile Include="NotInDaemonContextException.cs" />
-    <Compile Include="ProcessManagerExtensions.cs" />
-    <Compile Include="ProducerConsumerMediator.cs" />
     <Compile Include="ThreadPoolScheduler.cs" />
+    <Compile Include="Topic.cs" />
     <Compile Include="Util\AnonymousDisposer.cs" />
+    <Compile Include="Util\CopyOnWriteList.cs" />
+    <Compile Include="Util\NoWaitProducerUnsafeConsumerCollection.cs" />
     <Compile Include="Web\HttpRequest.cs" />
     <Compile Include="Web\HttpResponseStream.cs" />
-    <Compile Include="ZeroResponseContext.cs" />
-    <Compile Include="MessageBus\UnicastMessageBus.cs" />
-    <Compile Include="MessageContext.cs" />
     <Compile Include="Net\TcpConnection.cs" />
     <Compile Include="Net\TcpServer.cs" />
-    <Compile Include="Net\TcpServers.cs" />
-    <Compile Include="ProcessManager.cs" />
-    <Compile Include="Process.cs" />
+    <Compile Include="ThreadPoolDaemon.cs" />
     <Compile Include="DefaultScheduler.cs" />
     <Compile Include="DefaultSchedulerDispatcher.cs" />
     <Compile Include="IScheduler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Schedulers.cs" />
     <Compile Include="SharedAction.cs" />
-    <Compile Include="Util\NoWaitQueue.cs" />
+    <Compile Include="Util\NoWaitProducerConsumerCollection.cs" />
     <Compile Include="Util\WaitQueue.cs" />
     <Compile Include="Web\HttpResponse.cs" />
     <Compile Include="Web\HttpServer.cs" />
-    <Compile Include="Web\HttpServers.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

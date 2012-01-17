@@ -7,6 +7,6 @@ namespace Agents.Controllers
 {
     public interface IControllerFactory
     {
-        IController Build(Type controllerType, IProcess process);
+        IController Build(Type controllerType, IDaemon daemon);
     }
 }

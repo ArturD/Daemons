@@ -8,17 +8,17 @@ namespace Agents.IOExample
     {
         static void Main(string[] args)
         {
-            var processManager = new ProcessManager();
-            processManager.BuildProcess(process =>
-                                            {
+            //var processManager = new ProcessManager();
+            //processManager.BuildProcess(process =>
+            //                                {
                                                 
-                                                var streamWriter = new StreamWriter(File.OpenWrite("test.txt"), Encoding.UTF8);
-                                                streamWriter.Write("hello world", () =>
-                                                                       {
-                                                                           streamWriter.Dispose();
-                                                                           processManager.Dispose();
-                                                                       });
-                                            });
+            //                                    var streamWriter = new StreamWriter(File.OpenWrite("test.txt"), Encoding.UTF8);
+            //                                    streamWriter.Write("hello world", () =>
+            //                                                           {
+            //                                                               streamWriter.Dispose();
+            //                                                               processManager.Dispose();
+            //                                                           });
+            //                                });
         }
     }
 }

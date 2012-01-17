@@ -1,79 +1,86 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 
 namespace Agents.Util
 {
-    public class NoWaitQueue<TValue> : IProducerConsumerCollection<TValue>
+    public class NoWaitProducerUnsafeConsumerCollection<TValue> : IProducerConsumerCollection<TValue>
     {
-        private Node _first = new Node();
-        private Node _last;
+        protected Node First = new Node();
+        protected Node Last;
 
-        public NoWaitQueue()
+        public NoWaitProducerUnsafeConsumerCollection()
         {
-            _last = _first;
+            Last = First;
         }
 
         public void Add(TValue value)
         {
-            Node node = new Node() {Value = value};
-            
+            var node = new Node { Value = value };
+
             while (true)
             {
-                var last = _last;
+                var last = Last;
                 if (Interlocked.CompareExchange(ref last.Next, node, null) == null)
                 {
+                    //Interlocked.CompareExchange(ref _last, last.Next, last); 
+                    Last = last.Next; // can leed to race conditions, but that's ok
                     return;
                 }
-                Interlocked.CompareExchange(ref _last, last.Next, last);
+                Interlocked.CompareExchange(ref Last, last.Next, last);
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="val"></param>
+        /// <returns>true if value taken, false otherwise</returns>
         public bool TryTake(out TValue val)
         {
-            while (true)
+            var preFirst = First;
+            var next = preFirst.Next;
+            if (next == null)
             {
-                var preFirst = _first;
-                var first = preFirst.Next;
-                if (first == null)
-                {
-                    val = default(TValue);
-                    return false;
-                }
-                if (Interlocked.CompareExchange(ref _first, first, preFirst) == preFirst)
-                {
-                    val = first.Value;
-                    return true;
-                }
+                val = default(TValue);
+                return false;
+            }
+            First = next;
+            val = First.Value;
+            First.Value = default(TValue);
+            return true;
+        }
+
+        public bool Any()
+        {
+            return First.Next != null;
+        }
+
+        public IEnumerable<TValue> Take(int maxCount)
+        {
+            for (int i = 0; i < maxCount; i++)
+            {
+                TValue ret;
+                if (TryTake(out ret))
+                    yield return ret;
+                else
+                    yield break;
             }
         }
 
         public class Node
         {
-            public TValue Value { get; set; }
-            //internal int OnQueueFlag = 1;
-            internal Node Next;
-
-            //public bool OnQueue
-            //{
-            //    get { return OnQueueFlag == 1; }
-            //}
-
-            //public bool Remove()
-            //{
-            //    if (OnQueueFlag == 0) return false;
-            //    return Interlocked.Exchange(ref OnQueueFlag, 0) == 1;
-            //}
+            public TValue Value;
+            public Node Next;
         }
 
         public IEnumerator<TValue> GetEnumerator()
         {
-            TValue val = default(TValue);
-            while(TryTake(out val))
+            TValue val;
+            while (TryTake(out val))
             {
                 yield return val;
             }
@@ -120,5 +127,4 @@ namespace Agents.Util
             return this.AsEnumerable().ToArray();
         }
     }
-
 }

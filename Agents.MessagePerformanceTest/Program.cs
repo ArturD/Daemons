@@ -2,14 +2,13 @@
 using System.Linq;
 using System.Threading;
 
-namespace Agents.SchedulerPerformanceTest
+namespace Agents.MessagePerformanceTest
 {
     class Program
     {
         private static int _processNo = 1000;
         private static int _messagesPerProcess = 1000;
         private static int _countDown;
-        private static int[] _countArray;
         private static DateTime _start;
 
         static void Main(string[] args)
@@ -17,30 +16,28 @@ namespace Agents.SchedulerPerformanceTest
             if (args.Length >= 1) _processNo = int.Parse(args[0]);
             if (args.Length >= 2) _messagesPerProcess = int.Parse(args[1]);
 
-            _countArray = new int[_processNo];
-
             _start = DateTime.UtcNow;
 
             _countDown = _processNo;
             for (int i = 0; i < _processNo; i++)
             {
-                int i1 = i; // copy is required, so that closure works as intendent
+                Topic<int> topic = new Topic<int>();
                 var daemon = new ThreadPoolDaemon();
-                daemon.Schedule(() => Increment(daemon, i1));
+                topic.Subscribe(daemon, (msg) => Increment(topic, msg));
+                topic.Publish(0);
             }
-        
+
             Console.ReadLine();
         }
 
-        private static void Increment(IDaemon daemon, int i)
+        private static void Increment(IPublisher<int> publisher, int msg)
         {
-            _countArray[i]++;
-            if (_countArray[i] != _messagesPerProcess)
+            if (msg != _messagesPerProcess)
             {
-                daemon.Schedule(() => Increment(daemon, i));
+                publisher.Publish(msg + 1);
                 return;
             }
-            if(Interlocked.Decrement(ref _countDown) == 0)
+            if (Interlocked.Decrement(ref _countDown) == 0)
                 Console.WriteLine("Time: {0}", (DateTime.UtcNow - _start));
         }
     }

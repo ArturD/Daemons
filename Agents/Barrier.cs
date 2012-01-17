@@ -9,9 +9,9 @@ namespace Agents
 {
     public class Barrier
     {
-        private readonly NoWaitQueue<Action> _continuations = new NoWaitQueue<Action>();  
-        private volatile int _counter;
-        private volatile int _counter2;
+        private readonly NoWaitProducerConsumerCollection<Action> _continuations = new NoWaitProducerConsumerCollection<Action>();  
+        private int _counter;
+        private int _counter2;
 
         public Barrier(int counter)
         {
@@ -21,7 +21,7 @@ namespace Agents
 
         public void Join(Action continuation)
         {
-            JoinSync(() => Daemons.Current.Dispatcher.Schedule(continuation));
+            JoinSync(() => Daemons.Current.Schedule(continuation));
         }
 
         internal void JoinSync(Action action)
