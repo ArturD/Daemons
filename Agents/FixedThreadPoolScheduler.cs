@@ -10,13 +10,13 @@ namespace Agents
     /// <summary>
     /// Scheduler that targets minimal number of context switch.
     /// </summary>
-    public class DefaultScheduler : IScheduler
+    public class FixedThreadPoolScheduler : IScheduler
     {
         private List<Thread> _threads;
         private WaitQueue<Action> _actions = new WaitQueue<Action>();
         private bool _stopping = false;
  
-        public DefaultScheduler(int numberOfThreads)
+        public FixedThreadPoolScheduler(int numberOfThreads)
         {
             _threads = new List<Thread>();
             for (int i = 0; i < numberOfThreads; i++)
@@ -27,7 +27,7 @@ namespace Agents
             }
         }
 
-        public DefaultScheduler()
+        public FixedThreadPoolScheduler()
             : this(Environment.ProcessorCount)
         {
         }

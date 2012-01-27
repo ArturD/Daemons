@@ -47,13 +47,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Barrier.cs" />
+    <Compile Include="DaemonConfig.cs" />
+    <Compile Include="Configuration\DefaultConfig.cs" />
+    <Compile Include="Configuration\IConfig.cs" />
     <Compile Include="Controllers\ControllerFactory.cs" />
     <Compile Include="Controllers\ControllerInitializer.cs" />
     <Compile Include="Controllers\IController.cs" />
     <Compile Include="Controllers\IControllerFactory.cs" />
     <Compile Include="Controllers\DaemonControllerBase.cs" />
     <Compile Include="Controllers\IControllerInitializer.cs" />
-    <Compile Include="MessageBus\MessageBus.cs" />
+    <Compile Include="DaemonManager.cs" />
+    <Compile Include="IDaemonManager.cs" />
+    <Compile Include="MessageBus\SimpleMessageBus.cs" />
     <Compile Include="ServiceLocators\InstanceResolver.cs" />
     <Compile Include="ServiceLocators\IResolver.cs" />
     <Compile Include="ServiceLocators\IServiceLocator.cs" />
@@ -74,6 +79,7 @@
     <Compile Include="ServiceLocators\ServiceLocator.cs" />
     <Compile Include="ServiceLocators\SingletonLifetimeResolverWrapper.cs" />
     <Compile Include="ServiceLocators\RecursiveResolver.cs" />
+    <Compile Include="ThreadPoolDaemonFactory.cs" />
     <Compile Include="ThreadPoolScheduler.cs" />
     <Compile Include="Topic.cs" />
     <Compile Include="Util\AnonymousDisposer.cs" />
@@ -84,8 +90,8 @@
     <Compile Include="Net\TcpConnection.cs" />
     <Compile Include="Net\TcpServer.cs" />
     <Compile Include="ThreadPoolDaemon.cs" />
-    <Compile Include="DefaultScheduler.cs" />
-    <Compile Include="DefaultSchedulerDispatcher.cs" />
+    <Compile Include="FixedThreadPoolScheduler.cs" />
+    <Compile Include="Dispatcher.cs" />
     <Compile Include="IScheduler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SharedAction.cs" />

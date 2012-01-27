@@ -10,7 +10,7 @@ using NLog;
 
 namespace Agents
 {
-    public class DefaultSchedulerDispatcher : IDisposable, IScheduler
+    public class Dispatcher : IDisposable, IScheduler
     {
         private readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly IDaemon _daemon;
@@ -20,7 +20,7 @@ namespace Agents
         private volatile int _executing = 0;
         private bool _disposed = false;
 
-        public DefaultSchedulerDispatcher(IScheduler scheduler, IDaemon daemon)
+        public Dispatcher(IScheduler scheduler, IDaemon daemon)
         {
             _scheduler = scheduler;
             _daemon = daemon;

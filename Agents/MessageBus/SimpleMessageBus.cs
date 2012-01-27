@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 
 namespace Agents.MessageBus
 {
-    public class MessageBus : IMessageBus
+    public class SimpleMessageBus : IMessageBus
     {
         private readonly ConcurrentDictionary<string, object> _topics
             = new ConcurrentDictionary<string, object>();
@@ -16,6 +16,16 @@ namespace Agents.MessageBus
                 return topic as ITopic<T>;
             }
             throw new InvalidOperationException("Topic has been used with diffrent type.");
+        }
+
+        public void Publish<T>(string path, T message)
+        {
+            Topic<T>(path).Publish(message);
+        }
+
+        public IDisposable Subscribe<T>(string path, Action<T> consume)
+        {
+            return Topic<T>(path).Subscribe(consume);
         }
     }
 }

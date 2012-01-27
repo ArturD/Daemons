@@ -1,52 +1,56 @@
 ﻿using System;
 using Agents.Controllers;
+using Agents.MessageBus;
 
 namespace Agents.ControllerExample
 {
     class Program
     {
-    //    static readonly Barrier Barrier = new Barrier(2);
-    //    private static ProcessManager _processManager;
+        static readonly Barrier Barrier = new Barrier(2);
         static void Main(string[] args)
         {
-    //        _processManager = new ProcessManager();
-    //        var worker = _processManager.BuildProcess<PrinterProcessController>();
-    //        var controller = _processManager.BuildProcess<ClientProcessController>();
+            var manager = DaemonConfig.Default().Build();
+            manager.Build<ClientProcessController>();
+            manager.Build<PrinterProcessController>();
+            Console.ReadLine();
         }
 
-    //    public class ClientProcessController : ProcessControllerBase
-    //    {
-    //        public override void Initialize()
-    //        {
-    //            Barrier.Join(() =>
-    //                             {
-    //                                 int countDown = 100;
-    //                                 for (int i = 0; i < 100; i++)
-    //                                 {
-    //                                     var line = "line " + (i + 1);
-    //                                     Publish("/printer", line).
-    //                                         ExpectResponse<object>(
-    //                                             (m, c) =>
-    //                                                 {
-    //                                                     Console.WriteLine("printed: {0}", line);
-    //                                                     if (--countDown == 0) _processManager.Dispose();
-    //                                                 });
-    //                                 }
-    //                             });
-    //        }
-    //    }
-    //    public class PrinterProcessController : ProcessControllerBase
-    //    {
-    //        public override void Initialize()
-    //        {
-    //            Subscribe<string>("/printer", (request, context) =>
-    //                                              {
-    //                                                  Console.WriteLine("Print: " + request);
-    //                                                  context.Response(new object());
-    //                                              });
+        public class ClientProcessController : DaemonControllerBase
+        {
+            private readonly IMessageBus _messageBus;
 
-    //            Barrier.Join(()=> { });
-    //        }
-    //    }
+            public ClientProcessController(IMessageBus messageBus)
+            {
+                _messageBus = messageBus;
+            }
+
+            public override void Initialize()
+            {
+                Barrier.Join(() =>
+                                 {
+                                     for (int i = 0; i < 100; i++)
+                                     {
+                                         var line = "line " + (i + 1);
+                                         _messageBus.Publish("/printer", line);
+                                     }
+                                 });
+            }
+        }
+        public class PrinterProcessController : DaemonControllerBase
+        {
+            private readonly IMessageBus _messageBus;
+
+            public PrinterProcessController(IMessageBus messageBus)
+            {
+                _messageBus = messageBus;
+            }
+
+            public override void Initialize()
+            {
+                _messageBus.Subscribe<string>("/printer", request => Console.WriteLine("Print: " + request));
+
+                Barrier.Join(() => { });
+            }
+        }
     }
 }
