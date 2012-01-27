@@ -4,17 +4,25 @@ namespace Agents.Controllers
 {
     public class ControllerFactory : IControllerFactory
     {
-        protected virtual IController Constuct(Type controllerType)
+        private readonly IServiceProvider _serviceProvider;
+
+        public ControllerFactory(IServiceProvider serviceProvider)
         {
-            return (IController) Activator.CreateInstance(controllerType);
+            _serviceProvider = serviceProvider;
         }
 
-        public virtual IController Build(Type controllerType, IDaemon daemon)
+        public IController Build(Type controllerType)
         {
-            var controller = Constuct(controllerType);
-            controller.Daemon = daemon;
-            daemon.Schedule(controller.Initialize);
-            return controller;
+            if (controllerType == null) throw new ArgumentNullException("controllerType");
+            if(controllerType.IsSubclassOf(typeof(IController))) 
+                throw new ArgumentException(string.Format("controllerType ({0}) is not subclass of IController", controllerType));
+
+            var controller = _serviceProvider.GetService(controllerType);
+
+            if(!(controller is IController)) 
+                throw new InvalidOperationException("Cannot cast object returned by ServiceProvider to IController. Check IServiceProvider implementation.");
+
+            return (IController) controller;
         }
     }
 }

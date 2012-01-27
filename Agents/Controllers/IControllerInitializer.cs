@@ -5,8 +5,8 @@ using System.Text;
 
 namespace Agents.Controllers
 {
-    public interface IControllerFactory
+    public interface IControllerInitializer
     {
-        IController Build(Type controllerType);
+        void Initialize(IController controller, IDaemon daemon);
     }
 }

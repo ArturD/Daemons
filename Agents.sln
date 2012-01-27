@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agents", "Agents\Agents.csproj", "{1CE73E67-12ED-4EEA-9ED6-5B44ED28FEBE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agents.SchedulerPerformanceTest", "Agents.SimpleExample\Agents.SchedulerPerformanceTest.csproj", "{23D987F1-5E60-44AE-B497-F3725AE9DDE9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agents.SchedulerPerformanceTest", "Agents.SchedulerPerformanceTest\Agents.SchedulerPerformanceTest.csproj", "{23D987F1-5E60-44AE-B497-F3725AE9DDE9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agents.Tests", "Agents.Tests\Agents.Tests.csproj", "{88BC13D3-408D-4A84-BE3E-059AB512D721}"
 EndProject

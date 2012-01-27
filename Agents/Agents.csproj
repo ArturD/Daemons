@@ -48,9 +48,15 @@
   <ItemGroup>
     <Compile Include="Barrier.cs" />
     <Compile Include="Controllers\ControllerFactory.cs" />
+    <Compile Include="Controllers\ControllerInitializer.cs" />
     <Compile Include="Controllers\IController.cs" />
     <Compile Include="Controllers\IControllerFactory.cs" />
-    <Compile Include="Controllers\ProcessControllerBase.cs" />
+    <Compile Include="Controllers\DaemonControllerBase.cs" />
+    <Compile Include="Controllers\IControllerInitializer.cs" />
+    <Compile Include="MessageBus\MessageBus.cs" />
+    <Compile Include="ServiceLocators\InstanceResolver.cs" />
+    <Compile Include="ServiceLocators\IResolver.cs" />
+    <Compile Include="ServiceLocators\IServiceLocator.cs" />
     <Compile Include="Daemons.cs" />
     <Compile Include="IO\StreamExtensions.cs" />
     <Compile Include="IO\StreamPipe.cs" />
@@ -63,6 +69,11 @@
     <Compile Include="ITopic.cs" />
     <Compile Include="MessageBus\IMessageBus.cs" />
     <Compile Include="NotInDaemonContextException.cs" />
+    <Compile Include="ServiceLocators\IServiceRegister.cs" />
+    <Compile Include="ServiceLocators\ResolveContext.cs" />
+    <Compile Include="ServiceLocators\ServiceLocator.cs" />
+    <Compile Include="ServiceLocators\SingletonLifetimeResolverWrapper.cs" />
+    <Compile Include="ServiceLocators\RecursiveResolver.cs" />
     <Compile Include="ThreadPoolScheduler.cs" />
     <Compile Include="Topic.cs" />
     <Compile Include="Util\AnonymousDisposer.cs" />
