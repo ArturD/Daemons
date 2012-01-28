@@ -6,51 +6,57 @@ namespace Agents.ControllerExample
 {
     class Program
     {
-        static readonly Barrier Barrier = new Barrier(2);
         static void Main(string[] args)
         {
-            var manager = DaemonConfig.Default().Build();
-            manager.Build<ClientProcessController>();
-            manager.Build<PrinterProcessController>();
+            var barrier = new Barrier(2);
+            var manager = DaemonConfig.Default()
+                .RegisterServiceInstance(barrier)
+                .Build();
+            manager.Build<ClientDaemonController>();
+            manager.Build<PrinterDaemonController>();
             Console.ReadLine();
         }
 
-        public class ClientProcessController : DaemonControllerBase
+    }
+    public class ClientDaemonController : DaemonControllerBase
+    {
+        private readonly IMessageBus _messageBus;
+        private readonly Barrier _barrier;
+
+        public ClientDaemonController(IMessageBus messageBus, Barrier barrier)
         {
-            private readonly IMessageBus _messageBus;
-
-            public ClientProcessController(IMessageBus messageBus)
-            {
-                _messageBus = messageBus;
-            }
-
-            public override void Initialize()
-            {
-                Barrier.Join(() =>
-                                 {
-                                     for (int i = 0; i < 100; i++)
-                                     {
-                                         var line = "line " + (i + 1);
-                                         _messageBus.Publish("/printer", line);
-                                     }
-                                 });
-            }
+            _messageBus = messageBus;
+            _barrier = barrier;
         }
-        public class PrinterProcessController : DaemonControllerBase
+
+        public override void Initialize()
         {
-            private readonly IMessageBus _messageBus;
-
-            public PrinterProcessController(IMessageBus messageBus)
+            _barrier.Join(() =>
             {
-                _messageBus = messageBus;
-            }
+                for (int i = 0; i < 100; i++)
+                {
+                    var line = "line " + (i + 1);
+                    _messageBus.Publish("/printer", line);
+                }
+            });
+        }
+    }
+    public class PrinterDaemonController : DaemonControllerBase
+    {
+        private readonly IMessageBus _messageBus;
+        private readonly Barrier _barrier;
 
-            public override void Initialize()
-            {
-                _messageBus.Subscribe<string>("/printer", request => Console.WriteLine("Print: " + request));
+        public PrinterDaemonController(IMessageBus messageBus, Barrier barrier)
+        {
+            _messageBus = messageBus;
+            _barrier = barrier;
+        }
 
-                Barrier.Join(() => { });
-            }
+        public override void Initialize()
+        {
+            _messageBus.Subscribe<string>("/printer", request => Console.WriteLine("Print: " + request));
+
+            _barrier.Join(() => { });
         }
     }
 }
