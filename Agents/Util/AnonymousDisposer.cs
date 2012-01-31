@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Agents.Util
+namespace Daemons.Util
 {
     class AnonymousDisposer : IDisposable
     {

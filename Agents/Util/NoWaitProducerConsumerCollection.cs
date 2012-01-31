@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-namespace Agents.Util
+namespace Daemons.Util
 {
     public class NoWaitProducerConsumerCollection<TValue> : IProducerConsumerCollection<TValue>
     {

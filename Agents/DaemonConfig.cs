@@ -1,6 +1,6 @@
-﻿using Agents.Configuration;
+﻿using Daemons.Configuration;
 
-namespace Agents
+namespace Daemons
 {
     public static class DaemonConfig
     {

@@ -1,4 +1,4 @@
-namespace Agents
+namespace Daemons
 {
     public class ThreadPoolDaemonFactory : IDaemonFactory
     {

@@ -3,7 +3,7 @@ using System.IO;
 using System.Net.Sockets;
 using NLog;
 
-namespace Agents.Net
+namespace Daemons.Net
 {
     public class TcpConnection
     {

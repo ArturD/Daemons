@@ -1,4 +1,4 @@
-﻿using Agents.ServiceLocators;
+﻿using Daemons.ServiceLocators;
 using NUnit.Framework;
 
 namespace Agents.Tests.ServiceLocators

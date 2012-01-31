@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Agents
+namespace Daemons
 {
     [Serializable]
     public class NotInDaemonContextException : Exception

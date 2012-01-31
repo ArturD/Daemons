@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading;
+using Daemons;
 
 namespace Agents.MessagePerformanceTest
 {

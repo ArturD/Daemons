@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace Agents.Util
+namespace Daemons.Util
 {
     public class CopyOnWriteList<T> : IList<T>
     {

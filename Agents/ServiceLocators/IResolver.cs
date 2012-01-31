@@ -1,4 +1,4 @@
-namespace Agents.ServiceLocators
+namespace Daemons.ServiceLocators
 {
     public interface IResolver
     {

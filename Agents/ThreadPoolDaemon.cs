@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
-using Agents.MessageBus;
-using Agents.Util;
-using NLog;
+using Daemons.Util;
 
-namespace Agents
+namespace Daemons
 {
     public class ThreadPoolDaemon : IDaemon
     {

@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Agents.MessageBus;
 
-namespace Agents.Controllers
+namespace Daemons.Reactors
 {
-    public abstract class DaemonControllerBase : IController
+    public abstract class DaemonReactorBase : IReactor
     {
         public IDaemon Daemon { get; set; }
 

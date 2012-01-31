@@ -1,4 +1,4 @@
-namespace Agents.Configuration
+namespace Daemons.Configuration
 {
     public interface IConfig
     {

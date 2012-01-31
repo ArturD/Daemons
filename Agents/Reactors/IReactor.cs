@@ -1,6 +1,6 @@
-namespace Agents.Controllers
+namespace Daemons.Reactors
 {
-    public interface IController
+    public interface IReactor
     {
         IDaemon Daemon { get; set; }
         void Initialize();

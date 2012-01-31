@@ -1,6 +1,6 @@
 using System;
 
-namespace Agents
+namespace Daemons
 {
     public interface ISubscriber<out TMessage>
     {

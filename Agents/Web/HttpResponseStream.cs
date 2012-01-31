@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using System.Net.Sockets;
-using Agents.Net;
+using Daemons.Net;
 
-namespace Agents.Web
+namespace Daemons.Web
 {
     public class HttpResponseStream : Stream
     {

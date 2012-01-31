@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Text;
-using Agents.IO;
 
 namespace Agents.IOExample
 {

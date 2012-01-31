@@ -1,9 +1,12 @@
-using Agents.Controllers;
+using System;
+using Daemons.Reactors;
 
-namespace Agents
+namespace Daemons
 {
     public interface IDaemonManager
     {
-        T Build<T>() where T : IController;
+        T SpawnWithReactor<T>() where T : IReactor;
+        IDaemon Spawn();
+        IDaemon Spawn(Action<IDaemon> initAction);
     }
 }

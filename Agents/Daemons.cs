@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Agents
+namespace Daemons
 {
     public static class Daemons
     {

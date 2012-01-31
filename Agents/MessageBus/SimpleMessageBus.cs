@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 
-namespace Agents.MessageBus
+namespace Daemons.MessageBus
 {
     public class SimpleMessageBus : IMessageBus
     {

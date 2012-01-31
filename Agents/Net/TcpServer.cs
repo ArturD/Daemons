@@ -3,20 +3,18 @@ using System.Net;
 using System.Net.Sockets;
 using NLog;
 
-namespace Agents.Net
+namespace Daemons.Net
 {
     public class TcpServer
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        private readonly IDaemon _daemon;
-        private readonly IDaemonFactory _daemonFactory;
+        private readonly IDaemonManager _daemonManager;
         private TcpListener _listener = null;
         private Action<IDaemon, TcpConnection> _processInitializator;
 
-        public TcpServer(IDaemon daemon, IDaemonFactory daemonFactory)
+        public TcpServer(IDaemonManager daemonManager)
         {
-            _daemon = daemon;
-            _daemonFactory = daemonFactory;
+            _daemonManager = daemonManager;
         }
 
         public void Listen(IPEndPoint endpoint, Action<IDaemon, TcpConnection> processInitializator)
@@ -46,14 +44,13 @@ namespace Agents.Net
 
         private void BuildNewListenerProcess(TcpClient client)
         {
-            var process = _daemonFactory.BuildDaemon();
-            process.Schedule(
-                () =>
+            var process = _daemonManager.Spawn(
+                (daemon) =>
                     {
                         Logger.Trace("Started new TCP process.");
-                        var connection = new TcpConnection(client, process);
-                        process.OnShutdown(() => connection.Close());
-                        _processInitializator(process, connection);
+                        var connection = new TcpConnection(client, daemon);
+                        daemon.OnShutdown(connection.Close);
+                        _processInitializator(daemon, connection);
                     });
         }
     }

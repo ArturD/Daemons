@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Agents.Web
+namespace Daemons.Web
 {
     public class HttpRequest
     {

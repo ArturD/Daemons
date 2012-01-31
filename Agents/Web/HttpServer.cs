@@ -1,27 +1,26 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Linq;
-using Agents.Net;
+using Daemons.Net;
 using NLog;
 
-namespace Agents.Web
+namespace Daemons.Web
 {
     public class HttpServer
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        private readonly IDaemonFactory _daemonFactory;
+        private readonly IDaemonManager _daemonFactory;
         internal const string HttpNewLine = "\r\n";
         private static readonly Regex Endline = new Regex(HttpNewLine);
         private readonly TcpServer _tcpServer;
         private Action<IDaemon, HttpRequest, HttpResponse> _httpProcessInitializer;
 
-        public HttpServer(IDaemon daemon, IDaemonFactory daemonFactory)
+        public HttpServer(IDaemonManager daemonFactory)
         {
             _daemonFactory = daemonFactory;
-            _tcpServer = new TcpServer(daemon, daemonFactory);
+            _tcpServer = new TcpServer(daemonFactory);
         }
 
         public void Listen(IPEndPoint endpoint, Action<IDaemon, HttpRequest, HttpResponse> httpProcessInitializer)
@@ -104,13 +103,12 @@ namespace Agents.Web
 
         private void StartHttp(string[] headers, byte[] buffer, TcpConnection connection)
         {
-            var process = _daemonFactory.BuildDaemon();
-            process.Schedule(
-                ()=>
+            _daemonFactory.Spawn(
+                (daemon) =>
                     {
                         Logger.Debug("Staring http request processing :"+ headers[0]);
                         var startTime = DateTime.UtcNow;
-                        process.OnShutdown(() =>
+                        daemon.OnShutdown(() =>
                                                {
                                                    //connection.Process.Shutdown();
                                                    connection.Stream.Flush();
@@ -118,7 +116,7 @@ namespace Agents.Web
                                                    Logger.Debug("Ending http request processing {0}", (DateTime.UtcNow - startTime).TotalMilliseconds);
                                                });
                         // todo add killer
-                        _httpProcessInitializer(process, HttpRequest.Create(headers), new HttpResponse(connection));
+                        _httpProcessInitializer(daemon, HttpRequest.Create(headers), new HttpResponse(connection));
                     });
         }
 

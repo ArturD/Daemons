@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using Agents.Util;
+using Daemons.Util;
 using NLog;
 
-namespace Agents
+namespace Daemons
 {
     public class Dispatcher : IDisposable, IScheduler
     {

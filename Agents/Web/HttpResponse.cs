@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Agents.Net;
+using Daemons.Net;
 
-namespace Agents.Web
+namespace Daemons.Web
 {
     public class HttpResponse
     {
-        private TcpConnection _connection;
+        private readonly TcpConnection _connection;
 
         public Stream Stream { get; private set; }
 
@@ -37,11 +37,11 @@ namespace Agents.Web
             var byteContent = contentEncoder.GetBytes(response);
 
             var headers = FormatHeaders(new Dictionary<string, string>
-                             {
-                                 {"ContentType",  "text/plain"},
-                                 {"Connection", "keep-alive"},
-                                 {"Content-Length", "" + byteContent.Length}
-                             });
+                                            {
+                                                {"ContentType", "text/plain"},
+                                                {"Connection", "keep-alive"},
+                                                {"Content-Length", byteContent.Length.ToString()},
+                                            }).ToString();
             var byteHeaders = contentEncoder.GetBytes(headers);
             var buffer = new byte[byteHeaders.Length + byteContent.Length];
             byteHeaders.CopyTo(buffer, 0);
@@ -71,19 +71,19 @@ namespace Agents.Web
 
         public void WriteHeaders(IEnumerable<KeyValuePair<string, string>> headers)
         {
-            var str = FormatHeaders(headers);
-
+            var str = FormatHeaders(headers).ToString();
+            
             Write(Encoding.ASCII.GetBytes(str));
         }
 
-        private static string FormatHeaders(IEnumerable<KeyValuePair<string, string>> headers)
+        private static StringBuilder FormatHeaders(IEnumerable<KeyValuePair<string, string>> headers)
         {
-            var str =
-                "HTTP/1.1 200 OK" + HttpServer.HttpNewLine +
-                headers
-                    .Select(kv => kv.Key + ": " + kv.Value + HttpServer.HttpNewLine)
-                    .Aggregate("", (a, b) => a + b) + HttpServer.HttpNewLine;
-            return str;
+            var builder = new StringBuilder();
+            builder.Append("HTTP/1.1 200 OK" + HttpServer.HttpNewLine);
+            headers
+                .Select(kv => kv.Key + ": " + kv.Value + HttpServer.HttpNewLine)
+                .Aggregate(builder, (a, b) => a.Append(b));
+            return builder;
         }
     }
 }

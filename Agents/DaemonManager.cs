@@ -1,24 +1,37 @@
-﻿using Agents.Controllers;
+﻿using System;
+using Daemons.Reactors;
 
-namespace Agents
+namespace Daemons
 {
     public class DaemonManager : IDaemonManager
     {
-        private readonly IControllerFactory _controllerFactory;
-        private readonly IControllerInitializer _initializer;
+        private readonly IReactorFactory _reactorFactory;
+        private readonly IReactorInitializer _initializer;
         private readonly IDaemonFactory _daemonFactory;
 
-        public DaemonManager(IControllerFactory controllerFactory, IControllerInitializer initializer, IDaemonFactory daemonFactory)
+        public DaemonManager(IReactorFactory reactorFactory, IReactorInitializer initializer, IDaemonFactory daemonFactory)
         {
-            _controllerFactory = controllerFactory;
+            _reactorFactory = reactorFactory;
             _initializer = initializer;
             _daemonFactory = daemonFactory;
         }
 
-        public T Build<T>() where T : IController
+        public IDaemon Spawn()
+        {
+            return _daemonFactory.BuildDaemon();
+        }
+
+        public IDaemon Spawn(Action<IDaemon> initAction)
+        {
+            var daemon = Spawn();
+            daemon.Schedule(() => initAction(daemon));
+            return daemon;
+        }
+
+        public T SpawnWithReactor<T>() where T : IReactor
         {
             var daemon = _daemonFactory.BuildDaemon();
-            var controller = (T) _controllerFactory.Build(typeof (T));
+            var controller = (T) _reactorFactory.Build(typeof (T));
             _initializer.Initialize(controller, daemon);
             return controller;
         }

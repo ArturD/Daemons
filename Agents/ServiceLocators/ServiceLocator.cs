@@ -2,7 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
-namespace Agents.ServiceLocators
+namespace Daemons.ServiceLocators
 {
     public class ServiceLocator : IServiceLocator
     {

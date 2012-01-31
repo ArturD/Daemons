@@ -2,7 +2,7 @@
 using System.IO;
 using NLog;
 
-namespace Agents.IO
+namespace Daemons.IO
 {
     public static class StreamExtensions
     {

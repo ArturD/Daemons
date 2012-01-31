@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Net.Sockets;
 
-namespace Agents.IO
+namespace Daemons.IO
 {
     public class StreamPipe
     {

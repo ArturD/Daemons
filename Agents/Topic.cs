@@ -1,7 +1,7 @@
 using System;
-using Agents.Util;
+using Daemons.Util;
 
-namespace Agents
+namespace Daemons
 {
     public class Topic<TMessage> : ITopic<TMessage>
     {

@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agents", "Agents\Agents.csproj", "{1CE73E67-12ED-4EEA-9ED6-5B44ED28FEBE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daemons", "Agents\Daemons.csproj", "{1CE73E67-12ED-4EEA-9ED6-5B44ED28FEBE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agents.SchedulerPerformanceTest", "Agents.SchedulerPerformanceTest\Agents.SchedulerPerformanceTest.csproj", "{23D987F1-5E60-44AE-B497-F3725AE9DDE9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agents.Tests", "Agents.Tests\Agents.Tests.csproj", "{88BC13D3-408D-4A84-BE3E-059AB512D721}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daemons.Tests", "Agents.Tests\Daemons.Tests.csproj", "{88BC13D3-408D-4A84-BE3E-059AB512D721}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agents.EchoServerExample", "Agents.EchoServerExample\Agents.EchoServerExample.csproj", "{83701D4D-B2E1-4E7F-A0E0-38A57D7B27DC}"
 EndProject
@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agents.HttpSimpleExample", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agents.MessageBusExample", "Agents.MessageBusExample\Agents.MessageBusExample.csproj", "{BF074374-0348-4C1F-9AF9-5F01DD3C9EEB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agents.ControllerExample", "Agents.ControllerExample\Agents.ControllerExample.csproj", "{44EABB03-832F-4A67-A894-AE82F16448E7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daemons.ControllerExample", "Agents.ControllerExample\Daemons.ControllerExample.csproj", "{44EABB03-832F-4A67-A894-AE82F16448E7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agents.IOExample", "Agents.IOExample\Agents.IOExample.csproj", "{75A0484E-3D60-4FBC-995B-66F3C89588F7}"
 EndProject

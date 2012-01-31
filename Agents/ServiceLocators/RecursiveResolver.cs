@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 
-namespace Agents.ServiceLocators
+namespace Daemons.ServiceLocators
 {
     public class RecursiveResolver : IResolver
     {

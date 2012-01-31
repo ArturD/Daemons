@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Agents.MessageBus
+namespace Daemons.MessageBus
 {
     public interface IMessageBus
     {

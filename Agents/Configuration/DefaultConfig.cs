@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Agents.Controllers;
-using Agents.MessageBus;
-using Agents.ServiceLocators;
+using Daemons.MessageBus;
+using Daemons.Reactors;
+using Daemons.ServiceLocators;
 
-namespace Agents.Configuration
+namespace Daemons.Configuration
 {
     public class DefaultConfig : IConfig
     {
@@ -13,8 +13,8 @@ namespace Agents.Configuration
         public DefaultConfig()
         {
             RegisterService<IDaemonManager, DaemonManager>();
-            RegisterService<IControllerFactory, ControllerFactory>();
-            RegisterService<IControllerInitializer, ControllerInitializer>();
+            RegisterService<IReactorFactory, ReactorFactory>();
+            RegisterService<IReactorInitializer, ReactorInitializer>();
             RegisterService<IDaemonFactory, ThreadPoolDaemonFactory>();
             RegisterService<IMessageBus, SimpleMessageBus>();
         }

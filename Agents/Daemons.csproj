@@ -8,8 +8,8 @@
     <ProjectGuid>{1CE73E67-12ED-4EEA-9ED6-5B44ED28FEBE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Agents</RootNamespace>
-    <AssemblyName>Agents</AssemblyName>
+    <RootNamespace>Daemons</RootNamespace>
+    <AssemblyName>Daemons</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -50,12 +50,12 @@
     <Compile Include="DaemonConfig.cs" />
     <Compile Include="Configuration\DefaultConfig.cs" />
     <Compile Include="Configuration\IConfig.cs" />
-    <Compile Include="Controllers\ControllerFactory.cs" />
-    <Compile Include="Controllers\ControllerInitializer.cs" />
-    <Compile Include="Controllers\IController.cs" />
-    <Compile Include="Controllers\IControllerFactory.cs" />
-    <Compile Include="Controllers\DaemonControllerBase.cs" />
-    <Compile Include="Controllers\IControllerInitializer.cs" />
+    <Compile Include="Reactors\ReactorFactory.cs" />
+    <Compile Include="Reactors\ReactorInitializer.cs" />
+    <Compile Include="Reactors\IReactor.cs" />
+    <Compile Include="Reactors\IReactorFactory.cs" />
+    <Compile Include="Reactors\DaemonReactorBase.cs" />
+    <Compile Include="Reactors\IReactorInitializer.cs" />
     <Compile Include="DaemonManager.cs" />
     <Compile Include="IDaemonManager.cs" />
     <Compile Include="MessageBus\SimpleMessageBus.cs" />

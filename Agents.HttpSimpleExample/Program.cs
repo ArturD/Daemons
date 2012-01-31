@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using Agents.IO;
-using Agents.Web;
 using NLog;
 
 namespace Agents.HttpSimpleExample

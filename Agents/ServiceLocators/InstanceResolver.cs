@@ -1,6 +1,6 @@
 using System;
 
-namespace Agents.ServiceLocators
+namespace Daemons.ServiceLocators
 {
     public class InstanceResolver : IResolver
     {

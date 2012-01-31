@@ -1,14 +1,15 @@
-using Agents.Controllers;
-using Agents.MessageBus;
+using Daemons;
+using Daemons.MessageBus;
+using Daemons.Reactors;
 
 namespace Agents.ControllerExample
 {
-    public class ClientDaemonController : DaemonControllerBase
+    public class ClientDaemonReactor : DaemonReactorBase
     {
         private readonly IMessageBus _messageBus;
         private readonly Barrier _barrier;
 
-        public ClientDaemonController(IMessageBus messageBus, Barrier barrier)
+        public ClientDaemonReactor(IMessageBus messageBus, Barrier barrier)
         {
             _messageBus = messageBus;
             _barrier = barrier;
