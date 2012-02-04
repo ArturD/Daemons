@@ -1,57 +1,58 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using NLog;
+using System.Text;
+using Daemons.IO;
+using Daemons.Reactors;
 
 namespace Daemons.Net
 {
     public class TcpServer
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly IDaemonManager _daemonManager;
-        private TcpListener _listener = null;
-        private Action<IDaemon, TcpConnection> _processInitializator;
+        private TcpListener _listener;
+        private Action<TcpClient> _acceptor;
+
+        public TcpServer() 
+            : this(DaemonConfig.Default().BuildManager())
+        {
+        }
 
         public TcpServer(IDaemonManager daemonManager)
         {
+            if (daemonManager == null) throw new ArgumentNullException("daemonManager");
             _daemonManager = daemonManager;
         }
 
-        public void Listen(IPEndPoint endpoint, Action<IDaemon, TcpConnection> processInitializator)
+        public void Listen<TReactor>(IPEndPoint endpoint) where TReactor : IStreamReactor
         {
-            if(_listener != null)
-                throw new InvalidOperationException("Listen Called second time."); // todo make me more verbose
+            Listen(endpoint,
+                   (tcp) =>
+                       {
+                           _daemonManager.SpawnWithReactor<TReactor>(reactor => { reactor.Bind(tcp.GetStream()); });
+                       });
+        }
 
+        public void Listen(IPEndPoint endpoint, Action<TcpClient> acceptor)
+        {
+            if(_acceptor != null) throw new InvalidOperationException("Cannot call Listen twice");
+            _acceptor = acceptor;
             _listener = new TcpListener(endpoint);
-            _processInitializator = processInitializator;
             _listener.Start();
-            RunAccept();
+            TryAcceptSome();
         }
 
-        private void RunAccept()
+        private void TryAcceptSome()
         {
-            if (Logger.IsTraceEnabled) Logger.Trace("Begining Accept at {0}", GetHashCode());
-            _listener.BeginAcceptSocket(Accept, null);
-        }
-
-        private void Accept(IAsyncResult ar)
-        {
-            if(Logger.IsTraceEnabled) Logger.Trace("Ending Accept at {0}", GetHashCode());
-            var tcpClient = _listener.EndAcceptTcpClient(ar);
-            BuildNewListenerProcess(tcpClient);
-            RunAccept(); // todo consider scheduling it on process
-        }
-
-        private void BuildNewListenerProcess(TcpClient client)
-        {
-            var process = _daemonManager.Spawn(
-                (daemon) =>
+            _listener.BeginAcceptTcpClient(
+                asyncResult =>
                     {
-                        Logger.Trace("Started new TCP process.");
-                        var connection = new TcpConnection(client, daemon);
-                        daemon.OnShutdown(connection.Close);
-                        _processInitializator(daemon, connection);
-                    });
+                        var client = _listener.EndAcceptTcpClient(asyncResult);
+                        _acceptor(client);
+                        TryAcceptSome();
+;                    }, null);
         }
     }
 }

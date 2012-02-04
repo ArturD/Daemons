@@ -5,7 +5,7 @@ using NLog;
 
 namespace Daemons.Net
 {
-    public class TcpConnection
+    public class LowLevelTcpConnection
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly TcpClient _client;
@@ -22,7 +22,7 @@ namespace Daemons.Net
             get { return _stream; }
         }
 
-        public TcpConnection(TcpClient client, IDaemon daemon)
+        public LowLevelTcpConnection(TcpClient client, IDaemon daemon)
         {
             _client = client;
             _daemon = daemon;

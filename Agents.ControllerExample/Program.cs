@@ -10,7 +10,7 @@ namespace Agents.ControllerExample
             var initBarrier = new Barrier(2);
             var manager = DaemonConfig.Default()
                 .RegisterServiceInstance(initBarrier)
-                .Build();
+                .BuildManager();
             manager.SpawnWithReactor<ClientDaemonReactor>();
             manager.SpawnWithReactor<PrinterDaemonReactor>();
             Console.ReadLine();

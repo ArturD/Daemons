@@ -50,7 +50,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Agents\Agents.csproj">
+    <ProjectReference Include="..\Agents\Daemons.csproj">
       <Project>{1CE73E67-12ED-4EEA-9ED6-5B44ED28FEBE}</Project>
       <Name>Agents</Name>
     </ProjectReference>

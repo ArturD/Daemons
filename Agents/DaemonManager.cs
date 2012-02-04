@@ -16,6 +16,20 @@ namespace Daemons
             _daemonFactory = daemonFactory;
         }
 
+        public T SpawnWithReactor<T>() where T : IReactor
+        {
+            return SpawnWithReactor<T>((reactor) => { });
+        }
+
+        public T SpawnWithReactor<T>(Action<T> preInitAction) where T : IReactor
+        {
+            var daemon = _daemonFactory.BuildDaemon();
+            var reactor = (T)_reactorFactory.Build(typeof(T));
+            preInitAction(reactor);
+            _initializer.Initialize(reactor, daemon);
+            return reactor;
+        }
+
         public IDaemon Spawn()
         {
             return _daemonFactory.BuildDaemon();
@@ -26,14 +40,6 @@ namespace Daemons
             var daemon = Spawn();
             daemon.Schedule(() => initAction(daemon));
             return daemon;
-        }
-
-        public T SpawnWithReactor<T>() where T : IReactor
-        {
-            var daemon = _daemonFactory.BuildDaemon();
-            var controller = (T) _reactorFactory.Build(typeof (T));
-            _initializer.Initialize(controller, daemon);
-            return controller;
         }
     }
 }

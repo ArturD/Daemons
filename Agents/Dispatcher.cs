@@ -8,12 +8,11 @@ namespace Daemons
 {
     public class Dispatcher : IDisposable, IScheduler
     {
-        private readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly IDaemon _daemon;
         private readonly IProducerConsumerCollection<Action> _queue = new NoWaitProducerConsumerCollection<Action>();
         private readonly IScheduler _scheduler;
-        private int _elementCounter = 0;
-        private volatile int _executing = 0;
+        private int _executing = 0;
         private bool _disposed = false;
 
         public Dispatcher(IScheduler scheduler, IDaemon daemon)
@@ -36,6 +35,7 @@ namespace Daemons
                     action();
                 }
                 _executing = 0;
+                Thread.MemoryBarrier();
             }
             else
             {
@@ -73,6 +73,7 @@ namespace Daemons
                     }
                 }
                 _executing = 0;
+                Thread.MemoryBarrier();
             }
             else _scheduler.Schedule(DoOne);
         }

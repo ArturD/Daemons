@@ -9,11 +9,11 @@ namespace Daemons.Web
 {
     public class HttpResponse
     {
-        private readonly TcpConnection _connection;
+        private readonly LowLevelTcpConnection _connection;
 
         public Stream Stream { get; private set; }
 
-        public HttpResponse(TcpConnection connection)
+        public HttpResponse(LowLevelTcpConnection connection)
         {
             _connection = connection;
             Stream = new HttpResponseStream(connection);

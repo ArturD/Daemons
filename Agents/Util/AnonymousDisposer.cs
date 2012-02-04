@@ -2,7 +2,7 @@
 
 namespace Daemons.Util
 {
-    class AnonymousDisposer : IDisposable
+    public class AnonymousDisposer : IDisposable
     {
         private readonly Action _disposeAction;
 

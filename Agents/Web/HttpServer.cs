@@ -14,22 +14,22 @@ namespace Daemons.Web
         private readonly IDaemonManager _daemonFactory;
         internal const string HttpNewLine = "\r\n";
         private static readonly Regex Endline = new Regex(HttpNewLine);
-        private readonly TcpServer _tcpServer;
+        private readonly LowLevelTcpServer _lowLevelTcpServer;
         private Action<IDaemon, HttpRequest, HttpResponse> _httpProcessInitializer;
 
         public HttpServer(IDaemonManager daemonFactory)
         {
             _daemonFactory = daemonFactory;
-            _tcpServer = new TcpServer(daemonFactory);
+            _lowLevelTcpServer = new LowLevelTcpServer(daemonFactory);
         }
 
         public void Listen(IPEndPoint endpoint, Action<IDaemon, HttpRequest, HttpResponse> httpProcessInitializer)
         {
-            _tcpServer.Listen(endpoint, TcpProcess);
+            _lowLevelTcpServer.Listen(endpoint, TcpProcess);
             _httpProcessInitializer = httpProcessInitializer;
         }
 
-        private void TcpProcess(IDaemon daemon, TcpConnection connection)
+        private void TcpProcess(IDaemon daemon, LowLevelTcpConnection connection)
         {
             Buffer buffer =
                 new Buffer()
@@ -39,7 +39,7 @@ namespace Daemons.Web
             ReadOne(buffer, connection);
         }
 
-        private void ReadOne(Buffer buffer, TcpConnection connection)
+        private void ReadOne(Buffer buffer, LowLevelTcpConnection connection)
         {
             connection.ReadAsync(buffer.Segment.Array, buffer.Segment.Offset, buffer.Segment.Count, 
                 readBytes =>
@@ -101,7 +101,7 @@ namespace Daemons.Web
             return null;
         }
 
-        private void StartHttp(string[] headers, byte[] buffer, TcpConnection connection)
+        private void StartHttp(string[] headers, byte[] buffer, LowLevelTcpConnection connection)
         {
             _daemonFactory.Spawn(
                 (daemon) =>
@@ -120,7 +120,7 @@ namespace Daemons.Web
                     });
         }
 
-        private void KeepAlive(byte[] buffer, TcpConnection connection)
+        private void KeepAlive(byte[] buffer, LowLevelTcpConnection connection)
         {
             ReadOne(new Buffer() { Segment = new ArraySegment<byte>(buffer, 0, buffer.Length) }, connection);
         }
