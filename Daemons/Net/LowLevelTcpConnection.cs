@@ -1,13 +1,13 @@
 using System;
 using System.IO;
 using System.Net.Sockets;
-using NLog;
+using Common.Logging;
 
 namespace Daemons.Net
 {
     public class LowLevelTcpConnection
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILog Logger = LogManager.GetCurrentClassLogger();
         private readonly TcpClient _client;
         private readonly IDaemon _daemon;
         private readonly NetworkStream _stream;
@@ -36,7 +36,7 @@ namespace Daemons.Net
             {
                 Logger.Trace("Reading data synchronously");
                 var read = _stream.Read(buffer, offset, count);
-                if(Logger.IsTraceEnabled) Logger.Trace("Read data synchronously {0}", read);
+                if(Logger.IsTraceEnabled) Logger.TraceFormat("Read data synchronously {0}", read);
 
                 _daemon.Schedule(
                     () => endAction(read));
@@ -51,7 +51,7 @@ namespace Daemons.Net
             }
             catch (IOException exception)
             {
-                Logger.TraceException("Connection Reset by Peer", exception);
+                Logger.Debug("Connection Reset by Peer", exception);
                 _daemon.Shutdown();
             }
         }
@@ -63,17 +63,17 @@ namespace Daemons.Net
             {
                 if (Logger.IsTraceEnabled) Logger.Trace("Ending reading data asynchronously");
                 read = _stream.EndRead(asyncResult);
-                if (Logger.IsTraceEnabled)
-                    Logger.Trace("Read data asynchronously {0}", read);
+                
+                Logger.TraceFormat("Read data asynchronously {0}", read);
             }
             catch (IOException exception)
             {
-                Logger.TraceException("Connection Reset by Peer", exception);
+                Logger.Debug("Connection Reset by Peer", exception);
                 _daemon.Shutdown();
             }
             catch (Exception exception)
             {
-                Logger.FatalException(
+                Logger.Fatal(
                     "Exception while ending reading data asynchronously",
                     exception);
                 throw;
@@ -84,8 +84,7 @@ namespace Daemons.Net
 
         public void WriteAsync(byte[] buffer, int offset, int count, Action endAction)
         {
-            if (Logger.IsTraceEnabled)
-                Logger.Trace("Begining writing data asynchronously");
+            Logger.Trace("Begining writing data asynchronously");
             try
             {
                 _stream.BeginWrite(buffer, offset, count,
@@ -103,12 +102,12 @@ namespace Daemons.Net
             }
             catch (IOException exception)
             {
-                Logger.TraceException("Connection Reset by Peer", exception);
+                Logger.Trace("Connection Reset by Peer", exception);
                 _daemon.Shutdown();
             }
             catch (ObjectDisposedException exception)
             {
-                Logger.TraceException("Object disposed.", exception); // TODO think about this
+                Logger.Trace("Object disposed.", exception); // TODO think about this
             }
         }
 

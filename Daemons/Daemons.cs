@@ -32,7 +32,7 @@ namespace Daemons
         {
             get
             { 
-                var daemon = Current;
+                var daemon = CurrentOrNull;
                 if (daemon == null) return ThreadPoolScheduler.Instance;
                 return daemon;
             }

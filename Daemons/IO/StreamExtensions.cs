@@ -1,12 +1,12 @@
 ﻿using System;
 using System.IO;
-using NLog;
+using Common.Logging;
 
 namespace Daemons.IO
 {
     public static class StreamExtensions
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILog Logger = LogManager.GetCurrentClassLogger();
 
         public static void Read(this Stream  stream, byte[] buffer, int offset, int size, Action<int> continuation)
         {
@@ -23,7 +23,7 @@ namespace Daemons.IO
         public static void Write(this Stream stream, byte[] buffer, int offset, int size, Action continuation)
         {
             var daemon = Daemons.Current;
-
+            
             stream.BeginWrite(buffer, offset, size,
                              asyncResult =>
                              {
@@ -64,7 +64,7 @@ namespace Daemons.IO
 
         public static void Pipe(this Stream source, Stream destination, byte[] buffer, Action continuation)
         {
-            Pipe(source, destination, buffer, continuation, (e) => Logger.WarnException("Exception occured in pipe.", e));
+            Pipe(source, destination, buffer, continuation, (e) => Logger.Warn("Exception occured in pipe.", e));
         }
 
         public static void Pipe(this Stream source, Stream destination, byte[] buffer, Action continuation, Action<Exception> error)

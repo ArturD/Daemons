@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Collections.Specialized;
+using Common.Logging;
+using Common.Logging.Simple;
 using Daemons.MQ;
 
 namespace Daemons.MQExample
@@ -10,9 +10,10 @@ namespace Daemons.MQExample
     {
         static void Main(string[] args)
         {
+            //LogManager.Adapter = new ConsoleOutLoggerFactoryAdapter(new NameValueCollection());
             var config = DaemonConfig
                 .Default()
-                .WithMq((conf => conf.WithUdpEmCaster(emcasterConfig =>
+                .WithMq((conf => conf.WithPgmEmCaster(emcasterConfig =>
                                                           {
                                                               emcasterConfig.AddRoute("chat");
                                                               emcasterConfig.AddRoute(@"chat/[\w]*");
@@ -26,16 +27,14 @@ namespace Daemons.MQExample
             var channel = Console.ReadLine();
 
 
-            manager.Spawn(daemon =>
-                              {
-                                  bus.Subscribe<UserJoined>("chat", m => Console.WriteLine("# " + m.UserName + " joined #" + m.Channel));
-                                  bus.Subscribe(string.Format(@"chat\{0}", channel), (UserMessage m) => Console.WriteLine("{0}>{1}", m.UserName, m.Message));
-                                  bus.Publish("chat", new UserJoined { Channel = channel, UserName = userName});
-                              });
+            bus.Subscribe<UserJoined>("chat", m => Console.WriteLine("# " + m.UserName + " joined #" + m.Channel));
+            bus.Subscribe(string.Format(@"chat\{0}", channel), (UserMessage m) => Console.WriteLine("{0}>{1}", m.UserName, m.Message));
+            bus.Publish("chat", new UserJoined {Channel = channel, UserName = userName});
+
             while (true)
             {
                 var line = Console.ReadLine();
-                bus.Publish(string.Format(@"chat\{0}", channel), new UserMessage(){Message = line, UserName = userName});
+                bus.Publish(string.Format(@"chat\{0}", channel), new UserMessage() {Message = line, UserName = userName});
             }
         }
 

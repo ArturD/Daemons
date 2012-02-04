@@ -4,13 +4,13 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Linq;
 using Daemons.Net;
-using NLog;
+using Common.Logging;
 
 namespace Daemons.Web
 {
     public class HttpServer
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILog Logger = LogManager.GetCurrentClassLogger();
         private readonly IDaemonManager _daemonFactory;
         internal const string HttpNewLine = "\r\n";
         private static readonly Regex Endline = new Regex(HttpNewLine);
@@ -113,7 +113,7 @@ namespace Daemons.Web
                                                    //connection.Process.Shutdown();
                                                    connection.Stream.Flush();
                                                    KeepAlive(buffer, connection);
-                                                   Logger.Debug("Ending http request processing {0}", (DateTime.UtcNow - startTime).TotalMilliseconds);
+                                                   Logger.DebugFormat("Ending http request processing {0}", (DateTime.UtcNow - startTime).TotalMilliseconds);
                                                });
                         // todo add killer
                         _httpProcessInitializer(daemon, HttpRequest.Create(headers), new HttpResponse(connection));

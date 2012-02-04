@@ -2,13 +2,13 @@
 using System.Collections.Concurrent;
 using System.Threading;
 using Daemons.Util;
-using NLog;
+using Common.Logging;
 
 namespace Daemons
 {
     public class Dispatcher : IDisposable, IScheduler
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILog Logger = LogManager.GetCurrentClassLogger();
         private readonly IDaemon _daemon;
         private readonly IProducerConsumerCollection<Action> _queue = new NoWaitProducerConsumerCollection<Action>();
         private readonly IScheduler _scheduler;

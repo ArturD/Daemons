@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Messaging;
-using NLog;
+using Common.Logging;
 
 namespace Daemons.MQ.Msmq
 {
     public class MsmqQueue<T>
     {
 // ReSharper disable StaticFieldInGenericType
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILog Logger = LogManager.GetLogger(typeof (MsmqQueue<T>));
 // ReSharper restore StaticFieldInGenericType
         private readonly MessageQueue _messageQueue;
         private readonly MessageQueueSubscriber _subscriber;
@@ -46,7 +46,7 @@ namespace Daemons.MQ.Msmq
                                           }
                                           else
                                           {
-                                              Logger.Warn("Unexpected message type {0}. {1} expected.", messageObject.GetType(), typeof(T));
+                                              Logger.WarnFormat("Unexpected message type {0}. {1} expected.", messageObject.GetType(), typeof(T));
                                           }
                                       });
             return disposer;

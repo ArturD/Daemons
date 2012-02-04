@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
-using NLog;
+using Common.Logging;
 
 namespace Daemons.Net
 {
     public class LowLevelTcpServer
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILog Logger = LogManager.GetCurrentClassLogger();
         private readonly IDaemonManager _daemonManager;
         private TcpListener _listener = null;
         private Action<IDaemon, LowLevelTcpConnection> _processInitializator;
@@ -30,13 +30,13 @@ namespace Daemons.Net
 
         private void RunAccept()
         {
-            if (Logger.IsTraceEnabled) Logger.Trace("Begining Accept at {0}", GetHashCode());
+            if (Logger.IsTraceEnabled) Logger.TraceFormat("Begining Accept at {0}", GetHashCode());
             _listener.BeginAcceptSocket(Accept, null);
         }
 
         private void Accept(IAsyncResult ar)
         {
-            if(Logger.IsTraceEnabled) Logger.Trace("Ending Accept at {0}", GetHashCode());
+            if (Logger.IsTraceEnabled) Logger.TraceFormat("Ending Accept at {0}", GetHashCode());
             var tcpClient = _listener.EndAcceptTcpClient(ar);
             BuildNewListenerProcess(tcpClient);
             RunAccept(); // todo consider scheduling it on process

@@ -8,7 +8,7 @@ namespace Daemons.MQ.Integration.Emcaster
         private readonly BatchWriter _asyncWriter;
         public PgmPublisherFactory(string address, int port)
         {
-            var sendSocket = new PgmSource(address, port);
+            var sendSocket = new PgmSource(address, port) { BindPort = port+1};
             sendSocket.Start();
             _asyncWriter = new BatchWriter(sendSocket, 1500);
         }
