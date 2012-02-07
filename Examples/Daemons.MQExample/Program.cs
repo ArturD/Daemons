@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Linq;
-using Common.Logging;
-using Common.Logging.Simple;
 using Daemons.MQ;
 
 namespace Daemons.MQExample
@@ -10,7 +7,6 @@ namespace Daemons.MQExample
     {
         static void Main(string[] args)
         {
-            //LogManager.Adapter = new ConsoleOutLoggerFactoryAdapter(new NameValueCollection());
             var config = DaemonConfig
                 .Default()
                 .WithMq((conf => conf.WithUdpEmCaster(emcasterConfig =>
@@ -31,22 +27,17 @@ namespace Daemons.MQExample
             daemon.Schedule(
                 () =>
                     {
-                        bus.Subscribe<UserJoined>("chat",
-                                                  m => Console.WriteLine("# " + m.UserName + " joined #" + m.Channel));
-
-                        bus.Subscribe(string.Format(@"chat\{0}", channel),
-                                      (UserMessage m) => Console.WriteLine("{0}>{1}", m.UserName, m.Message));
-
+                        bus.Subscribe<UserJoined>("chat", 
+                            message => Console.WriteLine("# " + message.UserName + " joined #" + message.Channel));
+                        bus.Subscribe<UserMessage>(string.Format(@"chat\{0}", channel), 
+                            message => Console.WriteLine("{0}>{1}", message.UserName, message.Message));
                         bus.Publish("chat", new UserJoined {Channel = channel, UserName = userName});
 
                     });
             while (true)
             {
                 var line = Console.ReadLine();
-                int times = 1;
-                if (!int.TryParse(line.Split(' ').FirstOrDefault() ?? "", out times)) times = 1;
-                for (int i = 0; i < times; i++)
-                    bus.Publish(string.Format(@"chat\{0}", channel), new UserMessage() { Message = line, UserName = userName });
+                bus.Publish(string.Format(@"chat\{0}", channel), new UserMessage() { Message = line, UserName = userName });
             }
         }
 
