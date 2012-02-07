@@ -39,6 +39,7 @@ namespace Daemons.MQ.Emcaster.Sockets
             if (_actionQueue.Count == 0) return;
             var action = _actionQueue.Dequeue();
             action();
+            _daemon.Schedule(FlushOne);
         }
 
         private IAsyncResult BeginWrite(int length, byte[] copy)
@@ -54,7 +55,7 @@ namespace Daemons.MQ.Emcaster.Sockets
         private void EndWrite(IAsyncResult ar)
         {
             int result = _source.EndWrite(ar);
-            FlushOne();
+            _daemon.Schedule(FlushOne);
         }
 
         public void Start()

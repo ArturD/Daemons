@@ -8,9 +8,18 @@ namespace Daemons
     {
         private readonly NoWaitProducerUnsafeConsumerCollection<Action> _actionQueue
             = new NoWaitProducerUnsafeConsumerCollection<Action>();
-
-        private readonly CopyOnWriteList<Timer> _timers = new CopyOnWriteList<Timer>(); 
+        private readonly IScheduler _golbalScheduler;
         private int _scheduled;
+
+        public ThreadPoolDaemon() : this(ThreadPoolScheduler.Instance)
+        {
+        }
+
+        public ThreadPoolDaemon(IScheduler golbalScheduler)
+        {
+            if (golbalScheduler == null) throw new ArgumentNullException("golbalScheduler");
+            _golbalScheduler = golbalScheduler;
+        }
 
         public void Schedule(Action action)
         {
@@ -22,13 +31,8 @@ namespace Daemons
                     PartialFlush(); // agresive optimisation, if this thread is not used by other Daemon, abuse it.
                 }
                 else
-                    ThreadPool.QueueUserWorkItem(ScheduledPartialFlush);
+                    _golbalScheduler.Schedule(PartialFlush);
             }
-        }
-
-        private void ScheduledPartialFlush(object state)
-        {
-            PartialFlush();
         }
 
         private void PartialFlush()
@@ -39,7 +43,7 @@ namespace Daemons
             Thread.MemoryBarrier();
             if (_actionQueue.Any() && _scheduled == 0 && Interlocked.Exchange(ref _scheduled, 1) == 0)
             {
-                ThreadPool.QueueUserWorkItem(ScheduledPartialFlush);
+                _golbalScheduler.Schedule(PartialFlush);
             }
         }
 
@@ -84,20 +88,7 @@ namespace Daemons
 
         public IDisposable ScheduleInterval(Action action, TimeSpan dueTime, TimeSpan period)
         {
-            var timer = new Timer(ExecuteOnSchedulerAction, action, dueTime, period);
-            _timers.Add(timer);
-            return new AnonymousDisposer(() =>
-                                             {
-                                                 timer.Dispose();
-                                                 _timers.Remove(timer);
-                                             });
-        }
-
-        private void ExecuteOnSchedulerAction(object actionAsObject)
-        {
-            Schedule(() =>
-                     ((Action) actionAsObject)()
-                );
+            return _golbalScheduler.ScheduleInterval(() => Schedule(action), dueTime, period);
         }
 
         public void OnShutdown(Action shutdownAction)

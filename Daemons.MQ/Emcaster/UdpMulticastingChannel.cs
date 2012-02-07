@@ -21,6 +21,7 @@ namespace Daemons.MQ.Emcaster
             var sendSocket = new UdpSource(address, port);
             sendSocket.Start();
             var asyncWriter = new DaemonWritter(sendSocket);
+            //var asyncWriter = new BatchWriter(sendSocket,1500);
             TopicPublisher = new TopicPublisher(asyncWriter);
             TopicPublisher.Start();
 

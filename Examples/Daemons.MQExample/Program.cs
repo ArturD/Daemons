@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Specialized;
 using System.Linq;
 using Common.Logging;
 using Common.Logging.Simple;
@@ -14,34 +13,33 @@ namespace Daemons.MQExample
             //LogManager.Adapter = new ConsoleOutLoggerFactoryAdapter(new NameValueCollection());
             var config = DaemonConfig
                 .Default()
-                .WithMq((conf => conf.WithPgmEmCaster(emcasterConfig =>
+                .WithMq((conf => conf.WithUdpEmCaster(emcasterConfig =>
                                                           {
-                                                              //emcasterConfig.AddStressTestLayer(0.1);
-                                                              //emcasterConfig.AddReliabilityLayer(TimeSpan.FromSeconds(1));
+                                                              emcasterConfig.AddStressTestLayer(0.1);
+                                                              emcasterConfig.AddReliabilityLayer(TimeSpan.FromSeconds(1));
                                                               emcasterConfig.AddRoute("chat");
                                                               emcasterConfig.AddRoute(@"chat/[\w]*");
                                                           })));
             var bus = config.BuildMessageBus();
-            var manager = config.BuildManager();
-
+            
             Console.Write("Enter user name : ");
             var userName = Console.ReadLine();
             Console.Write("Enter channel : #");
             var channel = Console.ReadLine();
 
-            manager.Spawn(x =>
-                              {
-                                  bus.Subscribe<UserJoined>(
-                                      "chat",
-                                      m => Console.WriteLine("# " + m.UserName + " joined #" + m.Channel));
+            var daemon = new ThreadPoolDaemon();
+            daemon.Schedule(
+                () =>
+                    {
+                        bus.Subscribe<UserJoined>("chat",
+                                                  m => Console.WriteLine("# " + m.UserName + " joined #" + m.Channel));
 
-                                  bus.Subscribe(
-                                      string.Format(@"chat\{0}", channel),
+                        bus.Subscribe(string.Format(@"chat\{0}", channel),
                                       (UserMessage m) => Console.WriteLine("{0}>{1}", m.UserName, m.Message));
 
-                                  bus.Publish("chat", new UserJoined {Channel = channel, UserName = userName});
+                        bus.Publish("chat", new UserJoined {Channel = channel, UserName = userName});
 
-                              });
+                    });
             while (true)
             {
                 var line = Console.ReadLine();
