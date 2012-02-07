@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Specialized;
+using System.Linq;
 using Common.Logging;
 using Common.Logging.Simple;
 using Daemons.MQ;
@@ -15,6 +16,8 @@ namespace Daemons.MQExample
                 .Default()
                 .WithMq((conf => conf.WithPgmEmCaster(emcasterConfig =>
                                                           {
+                                                              //emcasterConfig.AddStressTestLayer(0.1);
+                                                              //emcasterConfig.AddReliabilityLayer(TimeSpan.FromSeconds(1));
                                                               emcasterConfig.AddRoute("chat");
                                                               emcasterConfig.AddRoute(@"chat/[\w]*");
                                                           })));
@@ -26,15 +29,26 @@ namespace Daemons.MQExample
             Console.Write("Enter channel : #");
             var channel = Console.ReadLine();
 
+            manager.Spawn(x =>
+                              {
+                                  bus.Subscribe<UserJoined>(
+                                      "chat",
+                                      m => Console.WriteLine("# " + m.UserName + " joined #" + m.Channel));
 
-            bus.Subscribe<UserJoined>("chat", m => Console.WriteLine("# " + m.UserName + " joined #" + m.Channel));
-            bus.Subscribe(string.Format(@"chat\{0}", channel), (UserMessage m) => Console.WriteLine("{0}>{1}", m.UserName, m.Message));
-            bus.Publish("chat", new UserJoined {Channel = channel, UserName = userName});
+                                  bus.Subscribe(
+                                      string.Format(@"chat\{0}", channel),
+                                      (UserMessage m) => Console.WriteLine("{0}>{1}", m.UserName, m.Message));
 
+                                  bus.Publish("chat", new UserJoined {Channel = channel, UserName = userName});
+
+                              });
             while (true)
             {
                 var line = Console.ReadLine();
-                bus.Publish(string.Format(@"chat\{0}", channel), new UserMessage() {Message = line, UserName = userName});
+                int times = 1;
+                if (!int.TryParse(line.Split(' ').FirstOrDefault() ?? "", out times)) times = 1;
+                for (int i = 0; i < times; i++)
+                    bus.Publish(string.Format(@"chat\{0}", channel), new UserMessage() { Message = line, UserName = userName });
             }
         }
 

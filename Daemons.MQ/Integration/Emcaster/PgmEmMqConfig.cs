@@ -1,22 +1,21 @@
-using System.Collections.Generic;
+using Daemons.MQ.Emcaster;
 
 namespace Daemons.MQ.Integration.Emcaster
 {
-    public class PgmEmMqConfig : MqConfig
+    public class PgmEmMqConfig : EmMqConfigBase
     {
-        private readonly PgmPublisherFactory _publisherFactory;
-        private readonly PgmSubscriber _subscriber;
+        public PgmEmMqConfig(IMulticastingChannel channel) : base(channel)
+        {
+        }
 
         public PgmEmMqConfig(string address, int port)
-            : base(new List<IMqRoute>())
+            : this(new PgmMulticastingChannel(address, port))
         {
-            _publisherFactory = new PgmPublisherFactory(address, port);
-            _subscriber = new PgmSubscriber(address, port);
         }
 
         public PgmEmMqConfig AddRoute(string pattern)
         {
-            AddRoute(new EmRoute(_publisherFactory, _subscriber, pattern));
+            AddRoute(new EmRoute(pattern, Channel));
             return this;
         }
     }

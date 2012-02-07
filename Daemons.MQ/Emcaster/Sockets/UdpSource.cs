@@ -42,5 +42,16 @@ namespace Emcaster.Sockets
             return true;
         }
 
+        public IAsyncResult BeginWrite(byte[] data, int offset, int length, AsyncCallback cb, object state)
+        {
+            byte[] bytes = new byte[length];
+            System.Array.Copy(data, offset, bytes, 0, length);
+            return _client.BeginSend(bytes, length, cb, state);
+        }
+
+        public int EndWrite(IAsyncResult asyncResult)
+        {
+            return _client.EndSend(asyncResult);
+        }
     }
 }

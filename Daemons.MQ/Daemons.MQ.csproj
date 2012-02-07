@@ -46,10 +46,24 @@
   <ItemGroup>
     <Compile Include="CompositeMessageBus.cs" />
     <Compile Include="CompositeMqFluentConfig.cs" />
+    <Compile Include="Emcaster\EmMulticastingChannelBase.cs" />
+    <Compile Include="Emcaster\IMulticastingChannel.cs" />
+    <Compile Include="Emcaster\CompositeSubscriber.cs" />
+    <Compile Include="Emcaster\MulticastingStressTestLayer.cs" />
+    <Compile Include="Emcaster\PgmMulticastingChannel.cs" />
+    <Compile Include="Emcaster\Reliability\InputMovingWindow.cs" />
+    <Compile Include="Emcaster\Reliability\MessageWithPath.cs" />
+    <Compile Include="Emcaster\Reliability\MulticastingChannelRealiabilityLayer.cs" />
+    <Compile Include="Emcaster\Reliability\HeartBeatMessage.cs" />
+    <Compile Include="Emcaster\Reliability\Message.cs" />
+    <Compile Include="Emcaster\Reliability\MessageBase.cs" />
+    <Compile Include="Emcaster\Reliability\OutputMovingWindow.cs" />
+    <Compile Include="Emcaster\Reliability\RegenerateRequest.cs" />
     <Compile Include="Emcaster\Sockets\AsyncReader.cs" />
     <Compile Include="Emcaster\Sockets\BatchWriter.cs" />
     <Compile Include="Emcaster\Sockets\ByteBuffer.cs" />
     <Compile Include="Emcaster\Sockets\ByteParser.cs" />
+    <Compile Include="Emcaster\Sockets\DaemonWritter.cs" />
     <Compile Include="Emcaster\Sockets\IByteParser.cs" />
     <Compile Include="Emcaster\Sockets\IByteParserFactory.cs" />
     <Compile Include="Emcaster\Sockets\IByteWriter.cs" />
@@ -76,16 +90,11 @@
     <Compile Include="Emcaster\Topics\TopicPublisher.cs" />
     <Compile Include="Emcaster\Topics\TopicQueueSubscriber.cs" />
     <Compile Include="Emcaster\Topics\TopicSubscriber.cs" />
-    <Compile Include="Integration\Emcaster\EmSubscriberBase.cs" />
-    <Compile Include="Integration\Emcaster\IEmPublisherFactory.cs" />
-    <Compile Include="Integration\Emcaster\IEmSubscriber.cs" />
+    <Compile Include="Emcaster\UdpMulticastingChannel.cs" />
+    <Compile Include="Integration\Emcaster\EmMqConfigBase.cs" />
     <Compile Include="Integration\Emcaster\PgmEmMqConfig.cs" />
-    <Compile Include="Integration\Emcaster\PgmPublisherFactory.cs" />
-    <Compile Include="Integration\Emcaster\PgmSubscriber.cs" />
     <Compile Include="Integration\Emcaster\UdpEmMqConfig.cs" />
-    <Compile Include="Integration\Emcaster\UdpPublisherFactory.cs" />
     <Compile Include="Integration\Emcaster\EmRoute.cs" />
-    <Compile Include="Integration\Emcaster\UdpSubscriber.cs" />
     <Compile Include="FakeDisposable.cs" />
     <Compile Include="ICompositeMqFluentConfig.cs" />
     <Compile Include="IMqConfig.cs" />
@@ -110,6 +119,7 @@
       <Name>Daemons</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

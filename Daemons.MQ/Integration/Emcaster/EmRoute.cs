@@ -1,26 +1,24 @@
 using System;
 using System.Text.RegularExpressions;
+using Daemons.MQ.Emcaster;
 using Daemons.Util;
 
 namespace Daemons.MQ.Integration.Emcaster
 {
     public class EmRoute : IMqRoute
     {
-        private readonly IEmPublisherFactory _publisherFactory;
-        private readonly IEmSubscriber _subscriber;
+        private readonly IMulticastingChannel _channel;
         private readonly Regex _pattern;
         private readonly CopyOnWriteList<Action<string, object>> _list =new CopyOnWriteList<Action<string,object>>();
 
-        public EmRoute(IEmPublisherFactory publisherFactory, IEmSubscriber subscriber, string pattern)
+        public EmRoute(string pattern, IMulticastingChannel channel)
         {
-            if (publisherFactory == null) throw new ArgumentNullException("publisherFactory");
-            if (subscriber == null) throw new ArgumentNullException("subscriber");
             if (pattern == null) throw new ArgumentNullException("pattern");
+            if (channel == null) throw new ArgumentNullException("channel");
 
-            _publisherFactory = publisherFactory;
-            _subscriber = subscriber;
+            _channel = channel;
             _pattern = new Regex(pattern, RegexOptions.Compiled);
-            subscriber.Subscribe(pattern, (p, o) =>
+            _channel.Subscribe(pattern, (p, o) =>
                                               {
                                                   foreach (Action<string,object> consumer in _list)
                                                   {
@@ -36,7 +34,7 @@ namespace Daemons.MQ.Integration.Emcaster
 
         public void Publish<T>(string path, T message)
         {
-            _publisherFactory.CreatePublisher().PublishObject(path, message, 30000);
+            _channel.Publish(path, message);
         }
 
         public bool CanSubscribe<T>(string path)
@@ -60,7 +58,7 @@ namespace Daemons.MQ.Integration.Emcaster
         /// <filterpriority>2</filterpriority>
         public void Dispose()
         {
-            _subscriber.Dispose();
+            _channel.Dispose();
         }
     }
 }

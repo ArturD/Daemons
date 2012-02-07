@@ -1,3 +1,5 @@
+using System;
+
 namespace Emcaster.Sockets
 {
     public interface IByteWriter

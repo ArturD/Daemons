@@ -8,6 +8,8 @@ namespace Daemons
     {
         private readonly NoWaitProducerUnsafeConsumerCollection<Action> _actionQueue
             = new NoWaitProducerUnsafeConsumerCollection<Action>();
+
+        private readonly CopyOnWriteList<Timer> _timers = new CopyOnWriteList<Timer>(); 
         private int _scheduled;
 
         public void Schedule(Action action)
@@ -70,24 +72,32 @@ namespace Daemons
         }
 
 
-        public void ScheduleOne(Action action, TimeSpan delay)
+        public IDisposable ScheduleOne(Action action, TimeSpan delay)
         {
-            var timer = new Timer(ExecuteAction, action, delay, new TimeSpan(-1));
+            return ScheduleInterval(action, delay, TimeSpan.FromMilliseconds(-1));
         }
 
-        public void ScheduleInterval(Action action, TimeSpan period)
+        public IDisposable ScheduleInterval(Action action, TimeSpan period)
         {
-            ScheduleInterval(action, period, period);
+            return ScheduleInterval(action, period, period);
         }
 
-        public void ScheduleInterval(Action action, TimeSpan dueTime, TimeSpan period)
+        public IDisposable ScheduleInterval(Action action, TimeSpan dueTime, TimeSpan period)
         {
-            var timer = new Timer(ExecuteAction, action, dueTime, period);
+            var timer = new Timer(ExecuteOnSchedulerAction, action, dueTime, period);
+            _timers.Add(timer);
+            return new AnonymousDisposer(() =>
+                                             {
+                                                 timer.Dispose();
+                                                 _timers.Remove(timer);
+                                             });
         }
 
-        private static void ExecuteAction(object actionAsObject)
+        private void ExecuteOnSchedulerAction(object actionAsObject)
         {
-            ((Action) actionAsObject)();
+            Schedule(() =>
+                     ((Action) actionAsObject)()
+                );
         }
 
         public void OnShutdown(Action shutdownAction)
