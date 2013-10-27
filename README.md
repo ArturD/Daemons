@@ -1,7 +1,7 @@
 Daemons
 =======
 
-Simple http server example:
+Simple tcp server example:
 
 ```CSharp
 using System;
